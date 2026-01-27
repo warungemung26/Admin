@@ -1,0 +1,241 @@
+/* ===== Tabel Flash Sale Scrollable ===== */
+.table-wrap {
+  max-height: 350px;               /* tinggi maksimal tabel */
+  overflow-y: auto;                /* scroll vertikal */
+  overflow-x: auto;                /* scroll horizontal */
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  background: #fff;
+  padding: 5px;
+}
+
+#flashTable {
+  width: max-content;              /* scroll horizontal jika lebar tabel > container */
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  font-size: 14px;
+}
+
+#flashTable th, #flashTable td {
+  padding: 10px 12px;
+  border: 1px solid #eee;
+  text-align: left;
+  min-width: 80px;
+  transition: background 0.2s;
+}
+
+#flashTable td[contenteditable] {
+  background: #fef9f5;
+  border-radius: 4px;
+}
+
+#flashTable tr:nth-child(even) td {
+  background: #fafafa;
+}
+
+#flashTable tr:hover td {
+  background: #eaf2ff;
+}
+
+/* Batasi lebar kolom label agar teks wrap ke bawah */
+#flashTable td.label {
+  max-width: 200px;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+/* Sticky header */
+#flashTable thead th {
+  position: sticky;
+  top: 0;
+  background: #007bff;  /* biru header */
+  color: #fff;
+  z-index: 5;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* ===== Toast Notification ===== */
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #333;
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  font-weight: 500;
+  z-index: 9999;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== Modal ===== */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content:center;
+  align-items:center;
+  z-index: 9999;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.modal-content {
+  background:#fff;
+  padding:25px 30px;
+  border-radius:12px;
+  min-width:280px;
+  text-align:center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  animation: slideUp 0.3s ease-out;
+}
+
+.modal-content p {
+  margin: 10px 0 20px;
+  font-size: 15px;
+  color: #333;
+}
+
+.modal-actions button {
+  margin: 0 6px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.modal-actions button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.modal-actions button#modalConfirmBtn {
+  background: #ff3b30;
+  color: #fff;
+}
+
+.modal-actions button#modalCancel {
+  background: #f1f1f1;
+  color: #333;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ===============================
+   Tab Repo Manager - Dashboard Style
+=============================== */
+
+/* Card umum */
+.card {
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  color: #333;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+/* Card warna berbeda */
+.card-upload {
+  background: #e8f0fe;  /* biru lembut */
+  border-left: 6px solid #3b82f6;
+}
+
+.card-folder {
+  background: #fff7e6;  /* kuning lembut */
+  border-left: 6px solid #f59e0b;
+}
+
+.card-repo {
+  background: #e6fef7;  /* hijau lembut */
+  border-left: 6px solid #10b981;
+}
+
+/* Judul card */
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+/* Input & Button group */
+.card input, .card button {
+  margin: 4px 0;
+}
+
+.card button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.card button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Preview area / file list */
+#previewArea, #fileList {
+  padding: 8px;
+  background: rgba(255,255,255,0.6);
+  border-radius: 6px;
+  min-height: 30px;
+}
+
+/* ZIP input style */
+#zipInputSafe {
+  display: block;
+  margin-top: 6px;
+}
+
+/* Tombol grup */
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .button-group {
+    flex-direction: column;
+  }
+}
