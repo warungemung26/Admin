@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GitHub Repo Manager</title>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;padding:16px;
+  background:#0f172a;color:#e5e7eb;
+  font-family:Arial,sans-serif
+}
+.container{max-width:480px;margin:auto}
+@media(min-width:768px){.container{max-width:860px}}
+h2{text-align:center}
+
+/* FORM */
+input,select{
+  width:100%;padding:10px;margin-bottom:8px;
+  border:none;border-radius:6px;
+  background:#020617;color:#e5e7eb
+}
+button{
+  padding:8px 14px;border:none;border-radius:6px;
+  font-weight:bold;cursor:pointer
+}
+.btn-main{background:#22c55e;color:#020617;width:100%}
+.btn-sec{background:#334155;color:#e5e7eb}
+.btn-danger{background:#dc2626;color:#fff}
+
+.btn-row{
+  display:flex;gap:8px;flex-wrap:wrap;
+  justify-content:center;margin:10px 0
+}
+
+/* REPO TREE */
+.repo-list{
+  border:1px solid #334155;border-radius:6px;overflow:hidden
+}
+.repo-row{
+  display:grid;
+  grid-template-columns:26px 26px 1fr 70px;
+  align-items:center;
+  gap:6px;
+  padding:6px 8px;
+  border-bottom:1px solid #334155
+}
+.repo-row:last-child{border-bottom:none}
+.repo-row input{margin:0;justify-self:center}
+.repo-icon{text-align:center}
+.repo-name{
+  white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;cursor:pointer
+}
+.repo-children{display:none;padding-left:18px}
+.repo-row.open + .repo-children{display:block}
+
+/* LOG */
+pre{
+  background:#020617;padding:10px;border-radius:6px;
+  height:160px;overflow:auto;font-size:12px
+}
+</style>
+</head>
+<body>
+	
+	<button onclick="history.back()" style="
+  margin-bottom:15px;
+  padding:8px 14px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  background:#f5f5f5;
+  cursor:pointer;">
+  ⬅ Kembali
+</button>
+
+
+<div class="container">
+  <h2>🚀 GitHub Repo Manager</h2>
+
+  <!-- ================= TOKEN MANAGER ================= -->
+  <div id="tab-token" class="tab-content">
+    <h3>🔐 GitHub Token Manager</h3>
+
+    <div class="card">
+      <label for="githubToken">Token GitHub</label>
+      <input
+        id="githubToken"
+        type="password"
+        placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+        autocomplete="off"
+      >
+
+      <label for="passphrase">Passphrase (untuk enkripsi)</label>
+      <input
+        id="passphrase"
+        type="password"
+        placeholder="Minimal 8 karakter (bebas)"
+        autocomplete="off"
+      >
+
+      <div class="btn-row">
+        <button id="btnPaste" type="button" class="btn-sec">📋 Paste</button>
+        <button id="btnUseStored" type="button" class="btn-sec">🔑 Pakai Token Tersimpan</button>
+      </div>
+
+      <div class="btn-row">
+        <button id="btnSave" type="button" class="btn-main">💾 Simpan (Encrypted)</button>
+        <button id="btnSavePlain" type="button" class="btn-sec">💾 Simpan (Plain)</button>
+      </div>
+
+      <div class="btn-row">
+        <button id="btnClearStored" type="button" class="btn-danger">🗑 Hapus Token</button>
+      </div>
+    </div>
+  </div>
+  <!-- ================= END TOKEN MANAGER ================= -->
+
+  <!-- ================= REPO INFO ================= -->
+  <input id="username" placeholder="GitHub Username">
+  <input id="repo" placeholder="Repository Name">
+  <input id="branch" value="main" placeholder="Branch">
+
+  <!-- ================= BOOKMARK ================= -->
+  <div class="btn-row">
+    <button class="btn-sec" onclick="saveBookmark()">🔖 Simpan Bookmark</button>
+    <button class="btn-sec" onclick="deleteBookmark()">🗑️ Hapus Bookmark</button>
+  </div>
+
+  <select id="bookmark" onchange="loadBookmark()">
+    <option value="">📂 Pilih Bookmark Tersimpan</option>
+  </select>
+
+  <!-- ================= ACTION (SEMUA TETAP ADA) ================= -->
+  <div class="btn-row">
+    <button class="btn-sec" onclick="loadRepo()">📂 Load Repo</button>
+    <button class="btn-sec" onclick="downloadSelected()">⬇️ Download</button>
+    <button class="btn-danger" onclick="deleteSelected()">🗑️ Delete</button>
+    <!-- ================= ZIP UPLOAD ================= -->
+<label>📦 File ZIP untuk Push</label>
+<input
+  type="file"
+  id="zip"
+  accept=".zip"
+/>
+
+    <button class="btn-main" onclick="pushZip()">📦 Push ZIP</button>
+  </div>
+
+<div id="progressWrap" style="display:none;margin-top:10px">
+  <div style="height:8px;background:#eee;border-radius:4px;overflow:hidden">
+    <div id="progressBar" style="height:100%;width:0%;background:#4caf50"></div>
+  </div>
+  <small id="progressText">Idle</small>
+</div>
+
+  <!-- ================= OUTPUT ================= -->
+  <div id="repoList" class="repo-list"></div>
+  <pre id="log"></pre>
+</div>
+
+
+
+<script>
+/* ========= UTIL ========= */
+const logEl = document.getElementById("log")
+const log = m => {
+  logEl.textContent += m + "\n"
+  logEl.scrollTop = logEl.scrollHeight
+}
+
+const ghHeaders = () => ({
+  "Authorization": "token " + token.value,
+  "Content-Type": "application/json"
+})
+
+/* ========= PROGRESS ========= */
+function setProgress(pct, text){
+  progressWrap.style.display = "block"
+  progressBar.style.width = pct + "%"
+  progressText.textContent = text || (pct + "%")
+}
+
+/* ========= BOOKMARK ========= */
+const getBookmarks = () =>
+  JSON.parse(localStorage.getItem("gh_bookmarks") || "[]")
+
+const saveBookmarks = d => {
+  localStorage.setItem("gh_bookmarks", JSON.stringify(d))
+  renderBookmarks()
+}
+
+function saveBookmark(){
+  if(!username.value || !repo.value)
+    return alert("Username & Repo wajib")
+
+  const list = getBookmarks()
+  if(list.some(b => b.username === username.value && b.repo === repo.value))
+    return
+
+  list.push({
+    username: username.value,
+    repo: repo.value,
+    branch: branch.value
+  })
+  saveBookmarks(list)
+}
+
+function deleteBookmark(){
+  if(bookmark.value === "") return
+  const list = getBookmarks()
+  list.splice(bookmark.value, 1)
+  saveBookmarks(list)
+}
+
+function renderBookmarks(){
+  bookmark.innerHTML = '<option value="">📂 Pilih Bookmark</option>'
+  getBookmarks().forEach((b, i) => {
+    bookmark.innerHTML +=
+      `<option value="${i}">${b.username}/${b.repo} (${b.branch})</option>`
+  })
+}
+
+function loadBookmark(){
+  if(bookmark.value === "") return
+  const b = getBookmarks()[bookmark.value]
+  username.value = b.username
+  repo.value = b.repo
+  branch.value = b.branch
+}
+
+renderBookmarks()
+
+/* ========= LOAD TREE ========= */
+async function loadRepo(){
+  repoList.innerHTML = ""
+  await loadDir("", repoList)
+  log("📂 Repo loaded")
+}
+
+async function loadDir(path, container){
+  const api =
+    `https://api.github.com/repos/${username.value}/${repo.value}/contents/${path}?ref=${branch.value}`
+
+  const res = await fetch(api, { headers: ghHeaders() })
+  if(!res.ok) return
+
+  const data = await res.json()
+
+  data.forEach(item => {
+    const row = document.createElement("div")
+    row.className = "repo-row"
+    row.innerHTML = `
+      <input type="checkbox" data-path="${item.path}" data-type="${item.type}">
+      <div class="repo-icon">${item.type === "dir" ? "📁" : "📄"}</div>
+      <div class="repo-name">${item.name}</div>
+      <div>
+        ${item.type === "file"
+          ? `<button class="btn-sec" onclick="window.open('${item.download_url}','_blank')">⬇️</button>`
+          : ""}
+      </div>
+    `
+
+    const name = row.querySelector(".repo-name")
+    if(item.type === "dir"){
+      name.onclick = () => row.classList.toggle("open")
+    }else{
+      name.onclick = () => window.open(item.download_url, "_blank")
+    }
+
+    container.appendChild(row)
+
+    if(item.type === "dir"){
+      const child = document.createElement("div")
+      child.className = "repo-children"
+      container.appendChild(child)
+      loadDir(item.path, child)
+    }
+  })
+}
+
+/* ========= SELECT ========= */
+const getSelected = () =>
+  [...document.querySelectorAll("input[type=checkbox]:checked")]
+
+/* ========= DOWNLOAD ========= */
+async function downloadSelected(){
+  const items = getSelected()
+  if(!items.length) return alert("Pilih file / folder")
+
+  const zip = new JSZip()
+
+  for(const i of items){
+    if(i.dataset.type === "file"){
+      const r = await fetch(
+        `https://raw.githubusercontent.com/${username.value}/${repo.value}/${branch.value}/${i.dataset.path}`
+      )
+      zip.file(i.dataset.path.split("/").pop(), await r.text())
+    }else{
+      await zipFolder(i.dataset.path, zip)
+    }
+  }
+
+  const blob = await zip.generateAsync({ type: "blob" })
+  const a = document.createElement("a")
+  a.href = URL.createObjectURL(blob)
+  a.download = "github-selected.zip"
+  a.click()
+}
+
+async function zipFolder(path, zip){
+  const api =
+    `https://api.github.com/repos/${username.value}/${repo.value}/contents/${path}?ref=${branch.value}`
+
+  const data = await (await fetch(api, { headers: ghHeaders() })).json()
+
+  for(const i of data){
+    if(i.type === "file"){
+      const r = await fetch(i.download_url)
+      zip.file(i.path, await r.text())
+    }else{
+      await zipFolder(i.path, zip)
+    }
+  }
+}
+
+/* ========= DELETE ========= */
+async function deleteSelected(){
+  const items = getSelected()
+  if(!items.length || !confirm("Hapus item terpilih?")) return
+
+  for(const i of items)
+    await deletePath(i.dataset.path)
+
+  loadRepo()
+}
+
+async function deletePath(path){
+  const api =
+    `https://api.github.com/repos/${username.value}/${repo.value}/contents/${path}?ref=${branch.value}`
+
+  const res = await fetch(api, { headers: ghHeaders() })
+  const data = await res.json()
+
+  if(Array.isArray(data)){
+    for(const i of data)
+      await deletePath(i.path)
+    return
+  }
+
+  await fetch(api, {
+    method: "DELETE",
+    headers: ghHeaders(),
+    body: JSON.stringify({
+      message: "delete " + path,
+      sha: data.sha,
+      branch: branch.value
+    })
+  })
+
+  log("🗑️ " + path)
+}
+
+/* ========= PUSH ZIP + PROGRESS (FIX LOADING LAMA) ========= */
+const yieldUI = () => new Promise(r => setTimeout(r, 0))
+
+async function pushZip(){
+  const file = document.getElementById("zip").files[0]
+  if(!file) return alert("Pilih file ZIP")
+
+  log("📦 Membaca ZIP...")
+  setProgress(1, "Membaca ZIP")
+  await yieldUI()
+
+  const zip = await JSZip.loadAsync(file)
+  const files = Object.values(zip.files).filter(f => !f.dir)
+  const total = files.length
+  let done = 0
+
+  for(const f of files){
+    await yieldUI()
+
+    setProgress(
+      Math.round((done / total) * 100),
+      `📄 ${f.name}`
+    )
+
+    const content = await f.async("string")
+    await pushFile(f.name, content)
+
+    done++
+    setProgress(
+      Math.round((done / total) * 100),
+      `⬆️ Upload ${done}/${total}`
+    )
+
+    log("⬆️ " + f.name)
+  }
+
+  setProgress(100, "✅ Push ZIP selesai")
+  log("✅ Push ZIP selesai")
+}
+
+async function pushFile(path, content){
+  const api =
+    `https://api.github.com/repos/${username.value}/${repo.value}/contents/${path}`
+
+  let sha = null
+  const check = await fetch(api + `?ref=${branch.value}`, {
+    headers: ghHeaders()
+  })
+
+  if(check.ok){
+    sha = (await check.json()).sha
+  }
+
+  const res = await fetch(api, {
+    method: "PUT",
+    headers: ghHeaders(),
+    body: JSON.stringify({
+      message: "push zip",
+      content: btoa(unescape(encodeURIComponent(content))),
+      branch: branch.value,
+      ...(sha && { sha })
+    })
+  })
+
+  if(!res.ok) throw await res.text()
+}
+</script>
+
+
+
+<script>
+/* ================= TOKEN MANAGER (SECURE) ================= */
+
+const STORAGE_KEY = "gh_token_enc"
+const STORAGE_IV  = "gh_token_iv"
+const STORAGE_PLAIN = "gh_token_plain"
+
+/* ---- UTIL ---- */
+const enc = new TextEncoder()
+const dec = new TextDecoder()
+
+async function getKey(pass){
+  const baseKey = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(pass),
+    "PBKDF2",
+    false,
+    ["deriveKey"]
+  )
+
+  return crypto.subtle.deriveKey(
+    {
+      name: "PBKDF2",
+      salt: enc.encode("github-token-salt"),
+      iterations: 100000,
+      hash: "SHA-256"
+    },
+    baseKey,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"]
+  )
+}
+
+/* ---- ENCRYPT ---- */
+async function encryptToken(token, pass){
+  const iv = crypto.getRandomValues(new Uint8Array(12))
+  const key = await getKey(pass)
+
+  const cipher = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    enc.encode(token)
+  )
+
+  localStorage.setItem(STORAGE_KEY, btoa(String.fromCharCode(...new Uint8Array(cipher))))
+  localStorage.setItem(STORAGE_IV,  btoa(String.fromCharCode(...iv)))
+}
+
+/* ---- DECRYPT ---- */
+async function decryptToken(pass){
+  const cipher = localStorage.getItem(STORAGE_KEY)
+  const iv = localStorage.getItem(STORAGE_IV)
+  if(!cipher || !iv) throw "Token tidak ditemukan"
+
+  const key = await getKey(pass)
+
+  const data = Uint8Array.from(atob(cipher), c => c.charCodeAt(0))
+  const ivArr = Uint8Array.from(atob(iv), c => c.charCodeAt(0))
+
+  const plain = await crypto.subtle.decrypt(
+    { name: "AES-GCM", iv: ivArr },
+    key,
+    data
+  )
+
+  return dec.decode(plain)
+}
+
+/* ================= BUTTON HANDLER ================= */
+
+btnPaste.onclick = async () => {
+  githubToken.value = await navigator.clipboard.readText()
+}
+
+btnSave.onclick = async () => {
+  if(!githubToken.value) return alert("Token kosong")
+  if(!passphrase.value) return alert("Isi passphrase dulu")
+
+  await encryptToken(githubToken.value, passphrase.value)
+  githubToken.value = ""
+  alert("✅ Token tersimpan (Encrypted)")
+}
+
+btnSavePlain.onclick = () => {
+  if(!githubToken.value) return alert("Token kosong")
+  localStorage.setItem(STORAGE_PLAIN, githubToken.value)
+  alert("⚠️ Token disimpan PLAIN (tidak aman)")
+}
+
+btnUseStored.onclick = async () => {
+  try{
+    if(localStorage.getItem(STORAGE_KEY)){
+      if(!passphrase.value) return alert("Masukkan passphrase")
+      githubToken.value = await decryptToken(passphrase.value)
+      alert("🔓 Token decrypted & dipakai")
+    }else if(localStorage.getItem(STORAGE_PLAIN)){
+      githubToken.value = localStorage.getItem(STORAGE_PLAIN)
+      alert("⚠️ Token plain dipakai")
+    }else{
+      alert("❌ Tidak ada token tersimpan")
+    }
+  }catch(e){
+    alert("❌ Passphrase salah / token rusak")
+  }
+}
+
+btnClearStored.onclick = () => {
+  localStorage.removeItem(STORAGE_KEY)
+  localStorage.removeItem(STORAGE_IV)
+  localStorage.removeItem(STORAGE_PLAIN)
+  githubToken.value = ""
+  passphrase.value = ""
+  alert("🗑 Token dihapus")
+}
+
+/* ================= INTEGRASI KE APP ================= */
+/* Pakai ini di ghHeaders() */
+Object.defineProperty(window, "token", {
+  get(){
+    return { value: githubToken.value }
+  }
+})
+</script>
+
+
+</body>
+</html>
