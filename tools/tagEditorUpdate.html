@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Admin Tools - Edit Tag Produk</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#f4f6f8;
+  padding:20px;
+}
+
+h2 { margin-bottom:8px; }
+
+textarea {
+  width:100%;
+  min-height:100px;
+  font-family:monospace;
+  padding:10px;
+  margin-bottom:10px;
+}
+
+button {
+  padding:6px 12px;
+  margin:4px 4px 4px 0;
+  cursor:pointer;
+}
+
+.table-wrap {
+  margin-top:15px;
+  border:1px solid #ccc;
+  max-height:320px;
+  overflow:auto;
+  background:#fff;
+}
+
+table {
+  border-collapse:collapse;
+  width:100%;
+}
+
+th, td {
+  border:1px solid #ddd;
+  padding:6px 8px;
+  font-size:13px;
+  white-space:nowrap;
+}
+
+th {
+  background:#eee;
+  position:sticky;
+  top:0;
+  z-index:2;
+}
+
+th.no-col, td.no-col {
+  width:50px;
+  text-align:center;
+}
+
+th.name-col, td.name-col {
+  max-width:260px;
+  text-align:center;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+th.tags-col, td.tags-col {
+  width:1%;
+  white-space:nowrap;
+}
+
+tr.active-row {
+  background: #fff3c4 !important;
+}
+
+tr.active-row td {
+  border-color: #f0c36d;
+}
+
+
+.tag-dropdown {
+  position:relative;
+  display:inline-block;
+  margin-right:5px;
+}
+
+.dropdown-content {
+  display:none;
+  position:absolute;
+  background:#fff;
+  border:1px solid #ccc;
+  z-index:20;
+  max-height:150px;
+  overflow-y:auto;
+  padding:5px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+}
+
+.dropdown-content label {
+  display:block;
+  margin-bottom:4px;
+  cursor:pointer;
+}
+
+input[type=text] {
+  display:inline-block;
+  min-width:140px;
+  box-sizing:border-box;
+}
+
+.tag-editor{border:1px solid #ccc;padding:6px;border-radius:6px;background:#fff}
+#tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px}
+.tag{background:#f6b042;color:#000;padding:3px 8px;border-radius:12px;font-size:12px}
+.tag b{margin-left:6px;cursor:pointer}
+#tag-suggest{list-style:none;padding:0;margin:4px 0 0;background:#fff;border:1px solid #ccc;max-height:120px;overflow:auto}
+#tag-suggest li{padding:4px;cursor:pointer}
+#tag-suggest li:hover{background:#eee}
+
+.tag.auto {
+  background:#dff1ff;
+  border:1px solid #7bb9e6;
+}
+
+.tag.auto i {
+  font-style:normal;
+  font-size:10px;
+  margin-right:4px;
+  color:#2b6cb0;
+}
+
+.preview-add {
+  color:#1e8449;
+  font-weight:600;
+}
+
+.preview-exist {
+  color:#888;
+  text-decoration:line-through;
+}
+
+.tag-bad {
+  background:#ffe5e5;
+}
+
+.tag-ok {
+  background:#ecfff3;
+}
+
+.tag-warn {
+  color:#c0392b;
+  font-size:12px;
+  margin-left:6px;
+}
+
+..tag-badge{
+  font-size:11px;
+  padding:2px 6px;
+  border-radius:6px;
+  margin-left:6px;
+  display:inline-block;
+}
+.tag-badge.bad{background:#ffe2e2;color:#c0392b;}
+.tag-badge.ok{background:#fff4cc;color:#b9770e;}
+.tag-badge.good{background:#e8fff0;color:#1e8449;}
+
+.tag-row-bad{
+  background:#fff6f6;
+}
+
+
+button.active{
+  background:#ffe2e2;
+  border:1px solid #e74c3c;
+  color:#c0392b;
+}
+
+</style>
+</head>
+
+<body>
+
+<h2> Admin Tools - Edit Tag Produk</h2>
+<textarea id="inputJson" style="width:100%;min-height:160px"></textarea>
+
+
+
+
+
+
+<button onclick="loadData()">Load</button>
+<button onclick="saveStorage()">Save</button>
+<button onclick="generateJson()">Generate</button>
+<button onclick="copyJson()">Copy JSON</button>
+<button onclick="downloadJson()">Download</button>
+
+<div id="activeInfo" style="margin:6px 0;color:#555;font-size:13px">
+  Pilih produk untuk edit tag
+</div>
+
+<div id="tagHealth" style="margin:4px 0;font-size:12px;color:#666"></div>
+
+
+<div class="tag-editor" style="display:flex;gap:8px;align-items:flex-start">
+	
+	<div id="tagPreviewBox" style="display:none;margin-top:6px;padding:6px;border:1px dashed #ccc;border-radius:6px;background:#fafafa;font-size:12px">
+  <b>Preview Tag Menu:</b>
+  <span id="tagPreviewText"></span>
+  <div style="margin-top:4px">
+    <button onclick="applyPreviewTags()">Apply</button>
+    <button onclick="cancelPreview()">Cancel</button>
+  </div>
+</div>
+
+<button onclick="filterBadTags()" 
+title="Menampilkan produk yang tag-nya masih kosong atau terlalu sedikit">
+⚠️ Miskin Tag
+</button>
+
+
+  <div class="tag-dropdown">
+    <button onclick="toggleGlobalMenu(event)">Select Tags</button>
+    <div class="dropdown-content" id="globalDropdown">
+  <input id="menuSearch" placeholder="Cari menu..." 
+         style="width:100%;box-sizing:border-box;margin-bottom:4px;padding:4px">
+  <div id="menuList"></div>
+</div>
+  </div>
+
+  <div style="flex:1">
+    <div id="tag-list"></div>
+    <input id="tag-input" placeholder="Tambah tag..." />
+    <ul id="tag-suggest"></ul>
+  </div>
+
+</div>
+
+<button onclick="bulkApplyTags()">Apply Tags to Filtered</button>
+
+<div id="bulkPreviewBox" 
+     style="display:none;margin:6px 0;padding:6px;border:1px dashed #aaa;background:#fafafa;font-size:12px">
+  <b>Bulk Preview:</b>
+  <div id="bulkPreviewText"></div>
+  <div style="margin-top:4px">
+    <button onclick="confirmBulkApply()">Apply</button>
+    <button onclick="cancelBulkPreview()">Cancel</button>
+  </div>
+</div>
+
+
+<button onclick="undoTags()">Undo</button>
+
+<div style="margin:10px 0;display:flex;gap:6px">
+  <input id="searchProduk" placeholder="Cari produk..." style="flex:1;padding:4px">
+  <select id="filterKategori" onchange="renderTable()">
+    <option value="">-- Semua Kategori --</option>
+  </select>
+</div>
+
+
+
+<div class="table-wrap">
+  <table id="produkTable">
+    <thead>
+      <tr>
+        <th class="no-col">No</th>
+        <th class="name-col">Nama Produk</th>
+        <th class="tags-col">Tags (dropdown + manual)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<textarea id="outputJson" placeholder="Hasil generate JSON..." style="margin-top:15px;"></textarea>
+
+<script>
+// ===== MASTER TAG WARUNG EMUNG =====
+const MASTER_TAGS = [
+  "cemilan","ringan","murah","minum","segar","makan","siang","malam","ngenyangin","kenyang","masak","instan","cepat","anget","hangat","sarapan","pagi","ringan","kopi","teh","susu","coklat","vanilla","dingin","segar","panas","manis","pahit",
+  "goreng","bakar","rebus","panggang","pedas","asin","gurih",
+  "snack","mie","sembako","frozen","minuman","makanan","roti",
+  "halal","promo","best","baru","hemat","stok","rumah","keluarga","laris","nonton","santai","ngopi","rokok"
+];
+</script>
+
+
+<script>
+// ================= DATA =================
+
+let produk = [];
+
+// ================= MENU MULTI TAG =================
+const masterMenus = [
+  { key:"sarapan", label:"🍳 Sarapan pagi", tags:["sarapan","pagi","ringan"] },
+  { key:"anget", label:"☕ Pengen sing anget", tags:["anget","hangat"] },
+  { key:"instan", label:"⚡ Perlu cepet & praktis", tags:["instan","cepat"] },
+  { key:"masak", label:"👨‍🍳 Masak dhewe", tags:["masak"] },
+
+  { key:"ngenyangin", label:"😋 Ngenyangin", tags:["ngenyangin","kenyang"] },
+  { key:"makan_siang", label:"🍛 Makan siang", tags:["makan","siang","ngenyangin"] },
+  { key:"minum", label:"🥤 Minum", tags:["minum","segar"] },
+  { key:"hemat", label:"💸 Hemat", tags:["hemat","murah"] },
+
+  { key:"cemilan", label:"🍪 Cemilan", tags:["cemilan","ringan"] },
+  { key:"manis", label:"🍫 Manis", tags:["manis","coklat","vanilla"] },
+  { key:"dingin", label:"🧊 Dingin", tags:["dingin","segar"] },
+
+  { key:"makan_malam", label:"🍽️ Makan malam", tags:["makan","malam","ngenyangin"] },
+  { key:"keluarga", label:"👨‍👩‍👧 Keluarga", tags:["keluarga"] },
+  { key:"nonton", label:"📺 Nonton", tags:["nonton","santai"] },
+  { key:"ngopi", label:"☕ Ngopi", tags:["kopi","ngopi"] },
+
+  { key:"gurih", label:"🧀 Gurih", tags:["gurih","asin","keju"] },
+  { key:"pedas", label:"🌶️ Pedas", tags:["pedas"] },
+
+  { key:"nyuci", label:"🧼 Nyuci", tags:["bersih","nyuci"] },
+  { key:"stok", label:"📦 Ngecek stok dapur", tags:["stok","rumah"] },
+
+  { key:"sakit", label:"🤒 Lagi sakit", tags:["obat","hangat","ringan"] },
+  { key:"rokok", label:"🚬 Rokok", tags:["rokok"] }
+];
+
+
+// ================= AUTO TAG RULES (PRO) =================
+const autoTagRules = {
+
+  /* ===== MINUMAN DASAR ===== */
+  kopi: ["kopi","coffee","espresso","latte","cappuccino","americano","arabika","robusta","torabika","good day"],
+  teh: ["teh","tea","earl","jasmine","oolong","matcha"],
+  susu: ["susu","milk","milky","creamy","milo"],
+  coklat: ["coklat","choco","chocolate","kakao","cocoa"],
+
+  /* ===== RASA ===== */
+  manis: ["beng beng","roma","silverqueen","wafer","vanilla","manis","sweet","gula","aren","madu","caramel"],
+  pahit: ["pahit","bitter"],
+  asam: ["asam","sour","jeruk","lemon","lime","markisa"],
+  gurih: ["taro","chitato","keju","ebi","gurih","savory","kaldu","umami"],
+  asin: ["asin","salted"],
+  pedas: ["pedas","spicy","hot","sambal","cabe","chili"],
+
+  /* ===== SUHU / KONDISI ===== */
+  dingin: ["es","ice","iced","cold","frozen"],
+  hangat: ["hangat","warm"],
+  panas: ["panas","hot"],
+
+  /* ===== TEKSTUR / KENYANG ===== */
+  creamy: ["creamy","krim","cream"],
+  renyah: ["kerupuk","keripik","crispy","renyah","crunchy"],
+  lembut: ["lembut","soft","empuk"],
+  ngenyangin: ["nasi","mie","kentang","roti","burger","sosis","pastel","cireng","seblak","bakso","spageti","kebab","bolu"],
+
+  /* ===== JENIS MAKANAN ===== */
+  mie: ["mie","ramen","udon","kwetiau","spaghetti","spageti"],
+  nasi: ["nasi","rice"],
+  roti: ["roti","bread","toast","bakery"],
+  snack: ["snack","cemilan","camilan","keripik","chips"],
+  dessert: ["dessert","cake","kue","donat","brownies","pudding","es krim","ice cream"],
+
+  /* ===== PROSES / CARA MASAK ===== */
+  goreng: ["goreng","fried","deep fry"],
+  bakar: ["bakar","grill","grilled","bbq"],
+  rebus: ["rebus","boiled"],
+  kukus: ["kukus","steamed"],
+  panggang: ["panggang","oven","baked"],
+
+  /* ===== MOMENT / KONTEKS ===== */
+  sarapan: ["sarapan","breakfast"],
+  makan_siang: ["siang","lunch"],
+  makan_malam: ["malam","dinner"],
+  santai: ["santai","nongkrong","ngopi"],
+  nonton: ["nonton","movie"],
+  cepat: ["cepat","instan","praktis","ready"],
+
+  /* ===== KHUSUS ===== */
+  tradisional: ["tradisional","kampung","nusantara"],
+  modern: ["modern","kekinian","fusion"],
+  sehat: ["sehat","healthy","diet","low sugar","less sugar"],
+  premium: ["premium","special","signature","exclusive"],
+
+  /* ===== SEMBAKO & BAHAN MASAK ===== */
+  sembako: ["beras","gula","minyak goreng","telur","tepung","garam","santan","tahu","tempe","ikan","kecap"],
+  masak: ["kacang kedelai","kacang tanah","blue band","beras","gula","minyak goreng","telur","tepung","garam","santan","kecap","cabai","cabe","ikan","tahu","tempe"],
+
+  /* ===== BERAS ===== */
+  beras: ["beras","rojolele","pandan","pandan wangi","cap rambutan","beras cap"],
+
+  /* ===== GULA ===== */
+  gula: ["gula","gulaku","gula pasir","gula batu","gula merah","gula batok","aren"],
+
+  /* ===== MINYAK ===== */
+  minyak: ["minyak goreng","bimoli","sunco","filma","tropical"],
+
+  /* ===== TELUR ===== */
+  telur: ["telur","telor","telur ayam"],
+
+  /* ===== TEPUNG ===== */
+  tepung: ["tepung","terigu","segitiga biru","tapioka","tepung beras","sajiku","bakwan"],
+
+  /* ===== KACANG ===== */
+  kacang: ["kacang","kacang tanah","kacang hijau","kedelai"],
+
+  /* ===== PROTEIN NABATI ===== */
+  tahu: ["tahu","tahu putih","tahu kuning","tahu kering"],
+  tempe: ["tempe","tempe segar"],
+
+  /* ===== BUMBU & PELENGKAP ===== */
+  bumbu: ["bumbu","kecap","garam","kaldu","penyedap","saos","saus","sambal","bawang","merica","ketumbar","kunyit","asam","lada"],
+  penyedap: ["penyedap","micin","msg","vetsin","sasa"],
+  kaldu: ["kaldu","royco","masako","sasa"],
+
+  kecap: ["kecap","bango","abc"],
+  saus: ["saus","saos","tiram","saori"],
+  sambal: ["sambal","balado","terasi","pedas"],
+
+  garam: ["garam dapur","cap dolphin","cap kapal"],
+  bawang: ["bawang","bawang merah","bawang putih"],
+
+  merica: ["merica","lada","ladaku","merica bubuk","merica butir"],
+  ketumbar: ["ketumbar","ketumbar bubuk","ketumbar biji"],
+  kunyit: ["kunyit","kunyit bubuk"],
+  asam2: ["asam","asam jawa"],
+
+  bumbu_instal: ["bumbu racik","bumbu komplit","sajiku","desaku","marinasi","opor","kari","gulai","sayur lodeh","nasi goreng","ayam goreng"],
+
+  /* ===== BAHAN SEGAR ===== */
+  cabai: ["cabe","cabai","rawit"],
+  ikan: ["ikan","teri","ikan teri","teri kering"],
+
+  /* ===== OBAT ===== */
+  sakit: ["oralit","promag","tolak angin","antangin","neozep","panadol","bodrex","paramek","decolgen","woods","obh","komix","gelusil","antibiotik","salep","plester","vitamin","ibuprofen","konidin","microlax","minyak kayu putih","minyak telon","hansaplast"],
+  obat: ["tablet","sirup","syrup","salep","enema","vitamin","obat","kapsul"],
+
+  /* ===== RUMAH ===== */
+  nyuci: ["rinso","soklin","daia","detergent","detergen","molto","softener","pewangi","cuci"],
+  mandi: ["sabun","shampo","lifebuoy","lux","dettol","giv","nuvo","pasta gigi","pepsodent"],
+  tidur: ["anti nyamuk","baygon","hit anti","autan","obat nyamuk"],
+
+  /* ===== ROKOK ===== */
+  rokok: ["rokok","filter","mild","kretek"],
+  kretek: ["gudang garam","djarum","kretek"],
+  populer: ["gudang garam","djarum","sampoerna","marlboro"],
+  dewasa: ["rokok","kretek","mild"], 
+
+  /* ===== SACHET ===== */
+  minuman: ["minuman"],
+  buah: ["jeruk","anggur","stroberi","mangga","blewah","buah"],
+  jahe: ["jahe","jahe merah","wedang"],
+  cereal: ["energen","cereal","kacang hijau"],
+  energi: ["energi","kuku bima"],
+  vitamin: ["vit c","vitamin","adem sari"],
+  sachetQty: ["1 sachet","10 sachet","25pcs"]
+};
+
+// ================= LOAD DATA =================
+function loadData(){
+  try{
+    produk = JSON.parse(inputJson.value);
+buildKategoriFilter();
+renderTable();
+window.buildGlobalMenu && buildGlobalMenu();
+autoSave();
+  }catch(e){
+    alert('JSON tidak valid');
+  }
+}
+
+function getTagQuality(tags){
+  const n = (tags || []).length;
+
+  if(n === 0) return { level:"bad", text:"❌ belum ada tag" };
+  if(n < 3)  return { level:"bad", text:"⚠️ tag terlalu sedikit" };
+  if(n < 6)  return { level:"ok",  text:"🟡 tag kurang optimal" };
+
+  return { level:"good", text:"✅ tag sehat" };
+}
+
+function updateTagHealth(){
+  if(typeof activeRow === "undefined" || activeRow === null) return;
+
+  const p = produk[activeRow];
+  if(!p) return;
+
+  const tags = p.tags || [];
+  const set = new Set(tags);
+
+  const total = tags.length;
+  const auto = (p._autoTags || []).length;
+  const manual = (p._manualTags || []).length;
+
+  let msg = `Tags: ${total} (🤖 ${auto} / ✍ ${manual})`;
+
+  const tagHealth = document.getElementById('tagHealth');
+  if(!tagHealth) return;
+
+  if(set.size < total){
+    msg += ` ⚠️ duplicate`;
+    tagHealth.style.color = '#c0392b';
+  }else if(total < 3){
+    msg += ` ⚠️ miskin tag`;
+    tagHealth.style.color = '#e67e22';
+  }else{
+    msg += ` ✅ sehat`;
+    tagHealth.style.color = '#2c7';
+  }
+
+  tagHealth.innerText = msg;
+}
+
+
+// ================= RENDER TABLE =================
+function renderTable(){
+  const tbody = document.querySelector('#produkTable tbody');
+  if(!tbody) return;
+
+  tbody.innerHTML = '';
+
+  const selectedCat = document.getElementById('filterKategori')?.value || '';
+  const keyword = document.getElementById('searchProduk')?.value.toLowerCase() || '';
+
+  let no = 1;
+
+  produk.forEach((p,i)=>{
+    // === FILTER DASAR ===
+    if(selectedCat && p.category !== selectedCat) return;
+    if(keyword && !p.name.toLowerCase().includes(keyword)) return;
+
+    // === AUTO TAG INIT ===
+    if (!p._autoTags) {
+      p._autoTags   = autoTagFromName(p) || [];
+      p._manualTags = p.tags || [];
+      p.tags = [...new Set([...p._autoTags, ...p._manualTags])];
+    }
+
+    // === QUALITY CHECK ===
+    const quality = getTagQuality(p.tags || []);
+
+    // === FILTER BAD ONLY ===
+    if (window.showBadOnly && quality.level !== "bad") return;
+
+    const tr = document.createElement('tr');
+
+    // === HIGHLIGHT ROW ===
+    if(quality.level === "bad"){
+      tr.classList.add("tag-row-bad");
+    }
+
+    // === RENDER ===
+    tr.innerHTML = `
+      <td class="no-col">${no++}</td>
+
+      <td class="name-col" title="${p.name}">
+        ${p.name}
+        <span class="tag-badge ${quality.level}">
+          ${quality.text}
+        </span>
+      </td>
+
+      <td class="tags-col">
+        ${(p.tags || []).join(', ')}
+      </td>
+    `;
+
+    tr.dataset.index = i;
+    tr.onclick = () => selectRow(tr.dataset.index);
+
+    tbody.appendChild(tr);
+  });
+
+  if (window.cancelPreview) cancelPreview();
+  if (window.updateTagHealth) updateTagHealth();
+}
+
+// ================= DROPDOWN =================
+
+
+// ================= UPDATE TAG =================
+
+
+// ================= AUTO TAG FROM NAME =================
+function autoTagFromName(product){
+  if(!product.name) return [];
+  const name = product.name.toLowerCase();
+  const tags = [];
+
+  for(const tag in autoTagRules){
+    autoTagRules[tag].forEach(k=>{
+      if(name.includes(k)) tags.push(normalizeTag(tag));
+    });
+  }
+  return [...new Set(tags)];
+}
+
+// ================= STORAGE =================
+function autoSave(){
+  localStorage.setItem('produkTagEditor', JSON.stringify(produk));
+}
+function saveStorage(){
+  autoSave();
+  alert('Tersimpan di LocalStorage');
+}
+
+// ================= JSON OUTPUT =================
+function generateJson(){
+  // clone & bersihkan field internal
+  const cleanProduk = produk.map(p=>{
+    const copy = {...p};
+    delete copy._autoTags;
+    return copy;
+  });
+
+  let json = JSON.stringify(cleanProduk, null, 2);
+
+  // padatkan tags jadi satu baris tanpa spasi
+  json = json.replace(
+    /"tags": \[\s*([\s\S]*?)\s*\]/g,
+    (_, c) => `"tags":[${c.split(',').map(t=>t.trim()).filter(Boolean).join(',')}]`
+  );
+
+  outputJson.value = json;
+}
+
+function copyJson(){
+  if(!outputJson.value) generateJson();
+  outputJson.select();
+  document.execCommand('copy');
+  alert('JSON berhasil di-copy');
+}
+
+function downloadJson(){
+  generateJson();
+  const blob = new Blob([outputJson.value],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'produk-tag.json';
+  a.click();
+}
+
+
+
+
+function buildKategoriFilter(){
+  const sel = document.getElementById('filterKategori');
+  if(!sel) return;
+
+  const cats = [...new Set(produk.map(p=>p.category).filter(Boolean))];
+
+  sel.innerHTML = `<option value="">-- Semua Kategori --</option>`;
+
+  cats.forEach(c=>{
+    const o = document.createElement('option');
+    o.value = c;
+    o.textContent = c;
+    sel.appendChild(o);
+  });
+}
+
+
+</script>
+
+<script>
+
+const input = document.getElementById("tag-input");
+const list  = document.getElementById("tag-list");
+const sug   = document.getElementById("tag-suggest");
+
+input.addEventListener("input", () => {
+  const v = input.value.toLowerCase();
+  sug.innerHTML = "";
+
+  if (!v){
+    renderPopularSuggest();
+    return;
+  }
+
+
+
+
+  MASTER_TAGS
+    .filter(t => t.includes(v) && !currentTags.includes(t))
+    .forEach(t => {
+      const li = document.createElement("li");
+      li.textContent = t;
+      li.onclick = () => addTag(t);
+      sug.appendChild(li);
+    });
+});
+
+
+input.addEventListener("keydown", e => {
+  if (e.key === "Enter" && input.value) {
+    addTag(input.value.toLowerCase());
+    e.preventDefault();
+  }
+});
+
+function addTag(tag){
+  tag = normalizeTag(tag);
+  if(!tag) return;
+
+  if(!currentTags.includes(tag)){
+    currentTags.push(tag);
+    renderTags();
+    syncToRow();
+  }
+
+  input.value="";
+  sug.innerHTML="";
+}
+
+
+
+function removeTag(tag){
+  if(activeRow === null) return;
+
+  const auto = produk[activeRow]._autoTags || [];
+  const isAuto = auto.includes(tag);
+
+  if(isAuto){
+    if(!confirm(`Tag "${tag}" adalah auto-tag.\nYakin mau hapus?`)){
+      return;
+    }
+  }
+
+  currentTags = currentTags.filter(t=>t!==tag);
+  renderTags();
+  syncToRow();
+}
+
+
+function renderTags(){
+  list.innerHTML="";
+
+  if(activeRow === null) return;
+
+  const auto = produk[activeRow]._autoTags || [];
+
+  currentTags.forEach(t=>{
+    const span = document.createElement("span");
+    const isAuto = auto.includes(t);
+
+    span.className = "tag" + (isAuto ? " auto" : "");
+    span.title = isAuto 
+  ? "Auto tag (hasil sistem, hapus dengan konfirmasi)" 
+  : "Tag manual";
+
+
+    span.innerHTML = `
+      ${isAuto ? "<i>A</i>" : ""}
+      ${t} <b onclick="removeTag('${t}')">×</b>
+    `;
+
+    list.appendChild(span);
+  });
+}
+
+
+
+function selectRow(i){
+  activeRow = Number(i);
+
+  if(!produk[i]._history) produk[i]._history = [];
+  
+  document.getElementById('activeInfo').innerText =
+    `Edit: ${produk[i].name}`;
+
+  document.querySelectorAll('#produkTable tbody tr')
+    .forEach(tr => {
+      tr.classList.toggle('active-row', tr.dataset.index == i);
+    });
+
+  produk[i]._manualTags = produk[i]._manualTags || (produk[i].tags || []);
+currentTags = [...produk[i]._manualTags];
+  renderTags();
+  updateTagHealth();
+  renderPopularSuggest();
+  cancelBulkPreview();
+}
+
+
+function syncToRow(){
+  if(activeRow===null) return;
+
+  const p = produk[activeRow];
+  if(!p._history) p._history = [];
+
+  const before = JSON.stringify(p.tags || []);
+  const afterArr = [...new Set(currentTags)];
+  const after = JSON.stringify(afterArr);
+
+  // 🚫 tidak ada perubahan
+  if(before === after) return;
+
+  // ✅ simpan history hanya jika beda
+  p._history.push([...(p.tags || [])]);
+  if(p._history.length > 30) p._history.shift();
+
+  p._manualTags = afterArr.filter(t => !(p._autoTags || []).includes(t));
+p.tags = [...new Set([...(p._autoTags||[]), ...p._manualTags])];
+currentTags = [...p._manualTags];
+
+
+  renderTags();
+  refreshRow(activeRow);
+  autoSave();
+  updateTagHealth();
+}
+
+
+function normalizeTag(t){
+  return t
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g,'_')
+    .replace(/[^a-z0-9_]/g,'');
+}
+
+
+
+
+let bulkTargets = [];
+
+function bulkApplyTags(){
+  if(activeRow===null){
+  document.getElementById('activeInfo').innerText =
+    "⚠️ Pilih produk dulu sebelum pilih tag menu";
+  return;
+}
+
+  const selectedCat = document.getElementById('filterKategori')?.value || '';
+  bulkTargets = [];
+
+  produk.forEach((p,i)=>{
+    if(selectedCat && p.category !== selectedCat) return;
+
+    const newTags = currentTags.filter(t => !(p.tags||[]).includes(t));
+    if(newTags.length){
+      bulkTargets.push({i, add:newTags});
+    }
+  });
+
+  if(!bulkTargets.length){
+    alert('Tidak ada perubahan');
+    return;
+  }
+
+  document.getElementById("bulkPreviewText").innerText =
+    `${bulkTargets.length} produk akan ditambah: ` +
+    [...new Set(bulkTargets.flatMap(x=>x.add))].join(', ');
+
+  document.getElementById("bulkPreviewBox").style.display = "block";
+}
+
+
+function getPopularTags(){
+  const map = {};
+
+  produk.forEach(p=>{
+    (p.tags||[]).forEach(t=>{
+      t = normalizeTag(t);
+      map[t] = (map[t]||0)+1;
+    });
+  });
+
+  return Object.entries(map)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,10)
+    .map(e=>e[0]);
+}
+
+function renderPopularSuggest(){
+  if(!sug) return;
+
+  sug.innerHTML = "";
+
+  getPopularTags().forEach(t=>{
+    if(currentTags.includes(t)) return;
+
+    const li = document.createElement("li");
+    li.textContent = "⭐ " + t;
+    li.onclick = ()=>addTag(t);
+    sug.appendChild(li);
+  });
+}
+
+function buildGlobalMenu(){
+  const list = document.getElementById("menuList");
+  const search = document.getElementById("menuSearch");
+
+  if(!list) {
+    console.log("menuList not found");
+    return;
+  }
+
+  list.innerHTML = "";
+
+  masterMenus.forEach(menu=>{
+    const d = document.createElement("div");
+    d.style.padding = "4px 6px";
+    d.style.cursor = "pointer";
+    d.style.borderBottom = "1px solid #eee";
+    d.textContent = menu.label;
+    d.onclick = ()=>applyGlobalMenu(menu.tags);
+    list.appendChild(d);
+  });
+
+  if(search){
+    search.oninput = ()=>{
+      const v = search.value.toLowerCase();
+      [...list.children].forEach(el=>{
+        el.style.display = el.textContent.toLowerCase().includes(v)
+          ? "block"
+          : "none";
+      });
+    };
+  }
+}
+
+
+function toggleGlobalMenu(e){
+  e.preventDefault();
+  e.stopPropagation();
+
+  const d = document.getElementById("globalDropdown");
+  const open = d.style.display === "block";
+
+  document.querySelectorAll(".dropdown-content")
+    .forEach(x => x.style.display = "none");
+
+  d.style.display = open ? "none" : "block";
+}
+
+
+function applyGlobalMenu(tags){
+  if(activeRow===null){
+    alert("Pilih produk dulu");
+    return;
+  }
+
+  previewTags = tags.map(t=>normalizeTag(t));
+
+  const parts = previewTags.map(t=>{
+    if(currentTags.includes(t)){
+      return `<span class="preview-exist">${t}</span>`;
+    }else{
+      return `<span class="preview-add">+${t}</span>`;
+    }
+  });
+
+  document.getElementById("tagPreviewText").innerHTML =
+    parts.join(", ");
+
+  document.getElementById("tagPreviewBox").style.display = "block";
+}
+
+
+document.addEventListener("click", () => {
+  const d = document.getElementById("globalDropdown");
+  if(d) d.style.display = "none";
+});
+
+document.getElementById("globalDropdown")
+  .addEventListener("click", e => e.stopPropagation());
+
+
+document.getElementById("searchProduk")
+  .addEventListener("input", ()=>renderTable());
+
+
+document.getElementById("tag-input").focus();
+
+
+function applyPreviewTags(){
+  const added = previewTags.filter(t=>!currentTags.includes(t));
+  if(!added.length){
+    cancelPreview();
+    return;
+  }
+
+  currentTags = [...new Set([...currentTags, ...previewTags])];
+  renderTags();
+  syncToRow();
+  refreshRow(activeRow);
+  cancelPreview();
+
+  document.getElementById("globalDropdown").style.display = "none";
+}
+
+
+function cancelPreview(){
+  previewTags = [];
+  const box = document.getElementById("tagPreviewBox");
+  if(box) box.style.display = "none";
+}
+
+
+function undoTags(){
+  if(activeRow===null) return;
+
+  const p = produk[activeRow];
+  if(!p._history || !p._history.length) return;
+
+  const prev = p._history.pop();
+if(!prev) return;
+currentTags = prev;
+
+  p.tags = [...currentTags];
+
+  renderTags();
+  refreshRow(activeRow);
+  autoSave();
+  updateTagHealth();
+}
+
+
+function refreshRow(i){
+  const row = document.querySelector(`#produkTable tbody tr[data-index="${i}"]`);
+  if(!row) return;
+
+  const cell = row.querySelector('.tags-col');
+  if(cell){
+    cell.textContent = (produk[i].tags || []).join(', ');
+  }
+}
+
+
+function confirmBulkApply(){
+  bulkTargets.forEach(x=>{
+    const p = produk[x.i];
+    if(!p._history) p._history = [];
+    p._history.push([...(p.tags||[])]);
+
+    p.tags = [...new Set([...(p.tags||[]), ...x.add])];
+  });
+
+  cancelBulkPreview();
+  renderTable();
+  autoSave();
+}
+
+function cancelBulkPreview(){
+  bulkTargets = [];
+  document.getElementById("bulkPreviewBox").style.display = "none";
+}
+
+buildGlobalMenu();
+
+function flashRow(i){
+  const row = document.querySelector(`#produkTable tbody tr[data-index="${i}"]`);
+  if(!row) return;
+
+  row.style.transition = "background 0.2s";
+  row.style.background = "#d4f8d4";
+
+  setTimeout(()=>{
+    row.style.background = "";
+  },600);
+}
+
+document.addEventListener("click", e=>{
+  if(!e.target.closest(".tag-editor")){
+    sug.innerHTML = "";
+  }
+});
+
+let showBadOnly = false;
+
+function filterBadTags(){
+  showBadOnly = !showBadOnly;
+
+  const btn = document.querySelector('button[onclick="filterBadTags()"]');
+
+  if(showBadOnly){
+    btn.classList.add("active");
+    btn.innerText = "⚠️ Produk Perlu Tag";
+  }else{
+    btn.classList.remove("active");
+    btn.innerText = "⚠️ Miskin Tag";
+  }
+
+  renderTable();
+}
+
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  initApp();
+});
+
+function initApp(){
+  const cache = localStorage.getItem('produkTagEditor');
+
+  if(cache){
+    produk = JSON.parse(cache);
+    buildKategoriFilter();
+    renderTable();
+  }
+
+  buildGlobalMenu();
+}
+
+</script>
+
+</body>
+</html>
