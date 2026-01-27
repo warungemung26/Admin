@@ -1,2 +1,2 @@
-# Admin
-tools admin untuk mengelola toko
+# WarungEmungAdmin
+Untuk manajemen stok Warung Emung
