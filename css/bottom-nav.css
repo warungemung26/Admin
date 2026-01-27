@@ -1,0 +1,61 @@
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  background: #fff;
+  border-top: 1px solid #ccc;
+  padding: 8px 0;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+/* Tombol umum */
+.nav-btn {
+  background: linear-gradient(145deg, #f5f5f5, #e0e0e0);
+  border: none;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+/* Hover efek tombol */
+.nav-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  background: linear-gradient(145deg, #e0e0e0, #f5f5f5);
+}
+
+/* Tombol GitHub khusus */
+.nav-btn.github {
+  background: linear-gradient(145deg, #24292e, #3c4147);
+  color: #fff;
+}
+
+.nav-btn.github:hover {
+  background: linear-gradient(145deg, #3c4147, #24292e);
+}
+
+/* Body dan form */
+html, body {
+  height: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-form {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-bottom: 120px; /* cukup untuk bottom-nav */
+}
+
+body {
+  padding-bottom: var(--nav-height, 120px);
+}
+
+
