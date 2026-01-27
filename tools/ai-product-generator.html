@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Product JSON Generator</title>
+
+<style>
+  body {
+    font-family: system-ui, Arial, sans-serif;
+    background: #f4f6f8;
+    padding: 20px;
+    max-width: 900px;
+    margin: auto;
+  }
+
+  h2, h3 { margin-top: 0; }
+
+  textarea {
+    width: 100%;
+    min-height: 180px;
+    box-sizing: border-box;
+    padding: 10px;
+    font-family: monospace;
+  }
+
+  select, button {
+    padding: 8px 12px;
+    margin: 6px 4px 6px 0;
+    cursor: pointer;
+  }
+
+  button.primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 6px;
+  }
+
+  button.danger {
+    background: #dc2626;
+    color: white;
+    border: none;
+    border-radius: 6px;
+  }
+
+  button.secondary {
+    background: #e5e7eb;
+    border: none;
+    border-radius: 6px;
+  }
+
+  .card {
+    background: white;
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    margin-top: 30px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<div class="top-bar">
+  <h2>🤖 AI Product JSON Generator</h2>
+  <button class="secondary" onclick="goBack()">⬅ Kembali ke Admin</button>
+</div>
+
+<!-- ===== INPUT JSON ===== -->
+<div class="card">
+  <h3>1️⃣ Paste JSON Produk</h3>
+  <textarea id="jsonInput" placeholder="Paste array JSON produk di sini..."></textarea><br>
+  <button class="primary" onclick="loadJSON()">Load JSON</button>
+  <button class="danger" onclick="clearAll()">Hapus</button>
+</div>
+
+<!-- ===== FILTER ===== -->
+<div class="card">
+  <h3>2️⃣ Filter Kategori</h3>
+  <select id="categorySelect" onchange="applyFilter()">
+    <option value="all">Semua</option>
+  </select>
+</div>
+
+<!-- ===== OUTPUT ===== -->
+<div class="card">
+  <h3>3️⃣ Hasil JSON (Siap Copy)</h3>
+  <textarea id="output" placeholder="Hasil filter muncul di sini..."></textarea><br>
+  <button class="primary" onclick="copyJSON()">📋 Copy JSON</button>
+  <button class="secondary" onclick="copyAIPrompt()">🤖 Copy Prompt AI</button>
+</div>
+
+<footer>
+  AI Generator • WarungEmung • JSON Tool
+</footer>
+
+<script>
+/* ===============================
+   CONFIG
+================================ */
+const STORAGE_KEY = 'ai_json_generator_data';
+let rawData = [];
+
+/* ===============================
+   KEMBALI KE ADMIN
+   (ubah admin.html jika perlu)
+================================ */
+function goBack() {
+  window.location.href = "../index.html";
+}
+
+/* ===============================
+   LOAD SAAT BUKA PAGE
+================================ */
+window.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return;
+
+  try {
+    const data = JSON.parse(saved);
+    jsonInput.value = data.jsonText || '';
+    loadJSON(data.selectedCategory || 'all');
+  } catch {
+    console.warn('Gagal restore data');
+  }
+});
+
+/* ===============================
+   LOAD JSON
+================================ */
+function loadJSON(selectedCat = 'all') {
+  try {
+    rawData = JSON.parse(jsonInput.value);
+
+    const categories = [...new Set(
+      rawData.map(p => p.category).filter(Boolean)
+    )];
+
+    categorySelect.innerHTML = '<option value="all">Semua</option>';
+
+    categories.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat;
+      categorySelect.appendChild(opt);
+    });
+
+    categorySelect.value = selectedCat;
+    applyFilter();
+  } catch {
+    alert('❌ JSON tidak valid');
+  }
+}
+
+/* ===============================
+   FILTER
+================================ */
+function applyFilter() {
+  const cat = categorySelect.value;
+
+  const filtered = cat === 'all'
+    ? rawData
+    : rawData.filter(p => p.category === cat);
+
+  output.value = JSON.stringify(filtered, null, 2);
+  saveState(cat);
+}
+
+/* ===============================
+   SAVE STATE
+================================ */
+function saveState(cat) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    jsonText: jsonInput.value,
+    selectedCategory: cat
+  }));
+}
+
+/* ===============================
+   COPY JSON
+================================ */
+function copyJSON() {
+  output.select();
+  document.execCommand('copy');
+  alert('✅ JSON berhasil dikopi');
+}
+
+/* ===============================
+   COPY AI PROMPT
+================================ */
+function copyAIPrompt() {
+  if (!output.value.trim()) {
+    alert('❌ Tidak ada data untuk prompt');
+    return;
+  }
+
+  const cat = categorySelect.value;
+
+  const prompt = `
+Kamu adalah AI pembuat data produk toko.
+
+TUGAS:
+Buatkan FILE JSON produk BARU yang BELUM ADA di daftar berikut.
+
+ATURAN WAJIB:
+- Kategori: "${cat}"
+- Jangan ada duplikat / nama mirip
+- Harga REALISTIS pasar Indonesia
+- Gunakan Rupiah (angka saja)
+- Struktur HARUS konsisten
+- Output HANYA JSON (tanpa penjelasan)
+
+FORMAT:
+{
+  "name": "",
+  "price": 0,
+  "img": "images/",
+  "category": "${cat}"
+}
+
+DATA YANG SUDAH ADA:
+${output.value}
+
+Buat minimal 5–10 produk baru.
+`;
+
+  navigator.clipboard.writeText(prompt.trim());
+  alert('🤖 Prompt AI berhasil dikopi');
+}
+
+/* ===============================
+   CLEAR
+================================ */
+function clearAll() {
+  if (!confirm('Hapus semua data dan storage?')) return;
+
+  jsonInput.value = '';
+  output.value = '';
+  categorySelect.innerHTML = '<option value="all">Semua</option>';
+  rawData = [];
+
+  localStorage.removeItem(STORAGE_KEY);
+}
+</script>
+
+</body>
+</html>
