@@ -1,0 +1,65 @@
+/* ====== STYLE TAB (STICKY) ====== */
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  display: flex;
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 15px;
+  background: #fff;
+  padding-top: 8px;
+}
+
+.tab {
+  padding: 10px 16px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  background: #f7f7f7;
+  margin-right: 5px;
+  border-radius: 6px 6px 0 0;
+  font-weight: bold;
+}
+.tab.active { 
+  background: #fff; 
+  border-bottom: 2px solid white; 
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Card wrapper */
+.card {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+}
+
+/* ======= MODAL ======= */
+#confirmModal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,.55);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+#confirmBox {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 350px;
+  text-align: center;
+}
+#confirmBox button {
+  padding: 10px 16px;
+  margin: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
