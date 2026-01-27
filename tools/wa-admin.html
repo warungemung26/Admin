@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>WA Admin – Warung Emung</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body{
+  font-family:system-ui,sans-serif;
+  background:#f4f4f4;
+  padding:20px
+}
+.card{
+  max-width:520px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.1)
+}
+h2{text-align:center;margin-top:0}
+label{font-weight:600;display:block;margin-top:14px}
+input,select{
+  width:100%;
+  padding:10px;
+  margin-top:6px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:15px
+}
+button{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  border:none;
+  border-radius:10px;
+  font-size:15px;
+  cursor:pointer
+}
+.btn-green{background:#25d366;color:#fff}
+.btn-dark{background:#111;color:#fff}
+.btn-blue{background:#0d6efd;color:#fff}
+.note{font-size:13px;color:#666;text-align:center;margin-top:10px}
+</style>
+</head>
+
+<body>
+	<div class="top-bar">
+  <button class="secondary" onclick="goBack()"> Kembali ke Admin Produk</button>
+</div>
+	
+<div class="card">
+<h2> Admin WhatsApp</h2>
+
+<label>Nomor WhatsApp</label>
+<input id="waNumber" placeholder="628xxxxxxxxxx">
+
+<button class="btn-green" id="pickContact"> Ambil dari Kontak</button>
+
+<label>Format Config</label>
+<select id="format">
+  <option value="json">JSON (data/whatsapp.json)</option>
+  <option value="js">JS (js/config.js)</option>
+</select>
+
+<label>GitHub Username</label>
+<input id="ghUser" value="warungemung26">
+
+<label>Repository</label>
+<input id="ghRepo" value="warungemung">
+
+<label>GitHub Token (classic)</label>
+<input id="ghToken" type="password" placeholder="ghp_xxxxxxxxx">
+
+<button class="btn-dark" id="saveLocal"> Simpan Lokal</button>
+<button class="btn-blue" id="download"> Download File</button>
+<button class="btn-green" id="pushGitHub"> Push ke GitHub</button>
+
+<div class="note">
+ Ambil kontak hanya support Chrome Android<br>
+ Token tidak disimpan ke storage
+</div>
+</div>
+
+<script>
+// ==========================
+// NORMALISASI NOMOR
+// ==========================
+function normalize(num){
+  if(!num) return "";
+  num=num.replace(/\s+/g,"").replace(/[^0-9+]/g,"");
+  if(num.startsWith("+62")) num="62"+num.slice(3);
+  if(num.startsWith("08")) num="62"+num.slice(1);
+  return num;
+}
+
+// ==========================
+// CONTACT PICKER
+// ==========================
+pickContact.onclick=async()=>{
+  if(!("contacts" in navigator)){
+    alert("Browser tidak mendukung kontak");
+    return;
+  }
+  try{
+    const c=await navigator.contacts.select(["tel"],{multiple:false});
+    if(c.length && c[0].tel?.length){
+      waNumber.value=normalize(c[0].tel[0]);
+    }
+  }catch(e){}
+};
+
+// ==========================
+// BUILD FILE (FIXED)
+// ==========================
+function buildFile(){
+  const num = normalize(waNumber.value);
+  if(!num) throw "Nomor WA kosong";
+
+  const now = new Date().toISOString();
+
+  // ===== JSON MODE =====
+  if(format.value === "json"){
+    return {
+      path: "data/whatsapp.json",
+      content: JSON.stringify({
+        default: num,
+        updated_at: now
+      }, null, 2),
+      mime: "application/json"
+    };
+  }
+
+  // ===== JS MODE (FALLBACK / LEGACY) =====
+  return {
+    path: "js/config.js",
+    content:
+`/*!
+ * Warung Emung - Global App Config
+ * Auto generated
+ */
+window.APP_CONFIG = window.APP_CONFIG || {};
+window.APP_CONFIG.WHATSAPP = {
+  DEFAULT: "${num}"
+};`,
+    mime: "application/javascript"
+  };
+}
+
+// ==========================
+// SAVE LOCAL
+// ==========================
+saveLocal.onclick=()=>{
+  const num=normalize(waNumber.value);
+  if(!num) return alert("Nomor tidak valid");
+  localStorage.setItem("ADMIN_WA_NUMBER",num);
+  alert("Disimpan ke localStorage");
+};
+
+// ==========================
+// DOWNLOAD
+// ==========================
+download.onclick=()=>{
+  try{
+    const f=buildFile();
+    const blob=new Blob([f.content],{type:f.mime});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=f.path.split("/").pop();
+    a.click();
+  }catch(e){alert(e)}
+};
+
+// ==========================
+// PUSH GITHUB
+// ==========================
+pushGitHub.onclick=async()=>{
+  try{
+    const f=buildFile();
+    const token=ghToken.value.trim();
+    if(!token) return alert("Token kosong");
+
+    const api=`https://api.github.com/repos/${ghUser.value}/${ghRepo.value}/contents/${f.path}`;
+
+    let sha=null;
+    const r=await fetch(api,{headers:{Authorization:`token ${token}`}});
+    if(r.ok){
+      const j=await r.json();
+      sha=j.sha;
+    }
+
+    const res=await fetch(api,{
+      method:"PUT",
+      headers:{
+        Authorization:`token ${token}`,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        message:"update whatsapp config",
+        content:btoa(unescape(encodeURIComponent(f.content))),
+        sha
+      })
+    });
+
+    if(res.ok) alert("Berhasil push ke GitHub 🚀");
+    else alert("Gagal push GitHub");
+
+  }catch(e){alert(e)}
+};
+
+// ==========================
+// LOAD SAVED
+// ==========================
+const saved=localStorage.getItem("ADMIN_WA_NUMBER");
+if(saved) waNumber.value=saved;
+
+/* ===============================
+   KEMBALI KE ADMIN
+   (ubah admin.html jika perlu)
+================================ */
+function goBack() {
+  window.location.href = "../index.html";
+}
+</script>
+</body>
+</html>
