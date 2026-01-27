@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title></title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/bottom-nav.css">
+<link rel="stylesheet" href="css/flash.css">
+<link rel="stylesheet" href="css/tabs.css">
+
+
+
+</head>
+<body>
+
+<h1>🛒 Admin Produk</h1>
+
+<!-- =============== MENU TAB =============== -->
+<div class="tabs">	
+  <div class="tab active" data-tab="offline">📦 Produk</div>
+  <div class="tab" data-tab="flash">⚡ Promo</div>
+  <div class="tab" data-tab="repo">🖼 Media</div>
+  <div class="tab" data-tab="token">⚙ Pengaturan</div>
+</div>
+
+<!-- ============================================================
+     TAB — PRODUK
+============================================================ -->
+<div id="tab-offline" class="tab-content active">
+	
+<div class="workflow-wrap">
+
+  <div class="workflow-bar">
+    <span data-step="import">📥 Import</span>
+    <span data-step="generate">🧬 Generate</span>
+    <span data-step="publish">🚀 Publish</span>
+    <span data-step="backup">📥 Backup</span>
+  </div>
+
+  <div id="produkFlowStatus" class="source-status">
+    📌 Silakan import produk dari GitHub.
+  </div>
+
+</div>
+	
+
+<h3 class="section-title">➕ Input Produk</h3>
+
+<!-- FORM TAMBAH -->
+<div class="card">
+  <h3>🛍️ Tambah Produk Baru</h3>
+  <div class="admin-form">
+    <input type="text" id="name" placeholder="Nama Produk">
+    <input type="number" id="price" placeholder="Harga (Rp)">
+
+    <label>Kategori:</label>
+    <select id="categorySelect" onchange="toggleCustomCategory(this)">
+      <option value="">Pilih Kategori</option>
+      <option value="sembako">Sembako</option>
+      <option value="makanan">Makanan Cepat Saji</option>
+      <option value="mie">Mie Instan</option>
+      <option value="snack">Snack</option>
+      <option value="minuman">Minuman</option>
+      <option value="minumansachet">Obat</option>
+      <option value="rumah">Rumah</option>
+      <option value="custom">Custom...</option>
+    </select>
+
+    <input type="text" id="customCategory" placeholder="Tulis kategori baru..." style="display:none;">
+
+    <label>Gambar Produk:</label>
+    <div style="display:flex; gap:10px;">
+      <input type="text" id="imageName" placeholder="nama-file-gambar">
+      <button type="button" onclick="triggerFilePickerTemp()">📁 Pilih</button>
+    </div>
+
+    <button class="btn-add" onclick="addProduct()">+ Tambah Produk</button>
+  </div>
+</div>
+
+<!-- MINI IMPORT JSON -->
+<div class="card json-mini">
+  <details>
+    <summary>📥 Import JSON (Opsional)</summary>
+    <textarea id="jsonInput" placeholder='Tempelkan array JSON di sini...'></textarea>
+    <div class="json-actions">
+      <button onclick="importJSON()">📤 Import</button>
+      <button onclick="clearJSONInput()">🧹 Bersihkan</button>
+    </div>
+  </details>
+</div>
+
+
+<!-- PRODUK TABLE PAKET -->
+<div class="card table-pack">
+
+  <div class="table-head">
+    <h3>📋 Data Produk</h3>
+
+    <div class="table-tools">
+      <select id="filterCategory" onchange="applyFilter()">
+        <option value="">Semua Kategori</option>
+      </select>
+
+      <select id="sortOption" onchange="applyFilter()">
+        <option value="">Urutkan</option>
+        <option value="nameAsc">A–Z</option>
+        <option value="nameDesc">Z–A</option>
+        <option value="priceLow">Termurah</option>
+        <option value="priceHigh">Termahal</option>
+      </select>
+
+      <div class="search-wrap">
+  <input id="searchInput" placeholder="Cari produk..." autocomplete="off">
+  <span id="searchClear" class="search-clear">❌</span>
+  <div id="searchSuggest" class="search-suggest"></div>
+</div>
+
+
+      <button onclick="resetFilter()">🔄</button>
+      <button onclick="openConfirmDeleteAll()" class="danger">🗑</button>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table id="productTable">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama</th>
+          <th>Harga</th>
+          <th>Kategori</th>
+          <th>Gambar</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+</div>
+
+
+
+<!-- OUTPUT -->
+<div class="card">
+  <h3>📦 Output JSON</h3>
+  <button onclick="generateAndScrollJSON()">🔄 Generate</button>
+  <button onclick="copyJSON()">📋 Copy</button>
+  <button onclick="window.open('tools/ai-product-generator.html','_blank')">🤖 AI Generator</button>
+  <pre id="jsonOutput">[ Kosong ]</pre>
+</div>
+
+</div>
+
+</body>
+
+<!-- ============================================================
+     TAB FLASH SALE
+============================================================ -->
+<div id="tab-flash" class="tab-content">
+  <h2>⚡ Kelola Flash Sale</h2>
+
+  <!-- IMPORT BOX -->
+  <div class="flash-import-box">
+    <h3>📥 Import JSON Flash</h3>
+
+    <!-- Import via FILE -->
+    <input type="file" id="flashFileInput" accept="application/json">
+    <button onclick="importFlashFromFile()">📁 Import dari File</button>
+
+    <!-- Import via TEXT -->
+    <textarea id="flashJsonText" placeholder="Paste JSON flash sale di sini..."></textarea>
+    <button onclick="importFlashFromText()">📥 Import dari Kode</button>
+    <button onclick="clearFlashJson()">🧹 Bersihkan Kode</button>
+  </div>
+
+  <!-- INPUT FLASH -->
+  <div class="card">
+    <h3>⚡ Flash Sale</h3>
+    <div class="admin-form">
+      <input type="text" id="flash_name" placeholder="Nama Produk">
+      <input type="number" id="flash_price_normal" placeholder="Harga Normal">
+      <input type="number" id="flash_price_flash" placeholder="Harga Flash">
+      <input type="number" id="flash_stock" placeholder="Stok">
+      <input type="text" id="flash_img" placeholder="URL Gambar">
+      <input type="text" id="flash_label" placeholder="Deskripsi">
+      <input type="datetime-local" id="flash_until">
+      <button onclick="addFlashProduct()">➕ Tambah Flash Sale</button>
+    </div>
+  </div>
+
+
+<!-- BAR ATAS FLASH TABLE -->
+<div style="display:flex; gap:10px; margin-bottom:10px;">
+  <button id="btnLoadFlashTop" class="btn">
+    🔄 Sync Flash Sale dari Repo
+  </button>
+</div>
+
+<div class="table-wrap">
+  <table id="flashTable">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Nama</th>
+        <th>Harga Normal</th>
+        <th>Harga Flash</th>
+        <th>Stok</th>
+        <th>Gambar</th>
+        <th>Label</th>
+        <th>Flash Sampai</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- ============================================================
+     OUTPUT JSON FLASH
+============================================================ -->
+<div class="card" id="flash_json_section">
+  <h3>📤 JSON Flash</h3>
+
+  <button onclick="generateAndScrollFlashJSON()">💾 Generate JSON Flash</button>
+  <button onclick="copyFlashJSON()">📋 Copy</button>
+
+  <pre id="flashJsonOutput">[ Kosong ]</pre>
+</div>
+
+  <!-- EXPORT -->
+  <div style="margin-top:10px;">
+    <button onclick="downloadFlashJSON()">📤 Download JSON Flash</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     TAB 2 — REPO MANAGER
+============================================================ -->
+<div id="tab-repo" class="tab-content">
+
+  <h2>🌐 Kelola Repo GitHub</h2>
+
+  <div class="card">
+    <h3>📂 Upload Gambar Massal</h3>
+    <input type="file" id="filePicker" multiple accept="image/*">
+    <button id="uploadMassalBtn">🚀 Upload</button>
+    <div id="previewArea"></div>
+  </div>
+
+  <div class="card">
+    <h3>🗂️ Kelola Folder Repo</h3>
+    <input id="folderPath" placeholder="nama-folder (misal: images)">
+    <button id="loadFolder">📂 Load</button>
+    <button id="deleteSelected">🗑️ Hapus Terpilih</button>
+    <button id="deleteAll">🗑️ Hapus Semua</button>
+    <button onclick="buatFolderBaru()">📁 Buat Folder Baru</button>
+
+    <div id="fileList">
+      <small>Menunggu load folder...</small>
+    </div>
+  </div>
+
+
+<!-- =========================
+     REPO MANAGER (UPLOAD)
+========================= -->
+  <div class="card" id="repoManager">
+    <h3>🔁 Repo Produk Manager</h3>
+  <!-- ====== PUSH ZIP TO GITHUB ====== -->
+<div class="push-zip-box">
+
+  <!-- Token (jika sudah ada di localStorage, bisa kamu sembunyikan) -->
+  <label class="label">GitHub Token</label>
+  <input type="text" id="githubToken" placeholder="Masukkan token GitHub" />
+
+  <!-- Picker ZIP -->
+  <label class="label">Pilih File ZIP</label>
+  <input type="file" id="zipInputSafe" accept=".zip" />
+
+  <!-- Tombol Upload -->
+  <button id="btnPushZip" onclick="pushZipToGitHubSafe()">
+    🚀 Push ZIP ke GitHub
+  </button>
+
+  <!-- Progress Bar -->
+  <progress id="pushProgress" max="100" value="0"></progress>
+
+  <!-- Status Log -->
+  <div id="pushStatus"></div>
+
+</div>
+     <button id="btnUploadProduk">📤 Upload Produk JSON</button>
+    <button id="btnUploadFlash">📤 Upload Flash JSON</button>
+    <button id="btnLoadFlash">🔁 Load Flash dari Repo</button>
+     <button onclick="downloadFlashJSON()">⬇ Download JSON Flash</button>
+    <button onclick="downloadJSON()">⬇️ Download JSON</button>
+    <button onclick="exportToExcel()">⬇️ Export Excel</button>
+   </div>
+  <p style="font-size:12px;color:#666;margin-top:8px;">
+    Pastikan token memiliki repo scope. File akan diupload ke <code>data/produk.json</code> dan <code>data/flash.json</code>.
+  </p>
+  <div class="card">
+  <h3>🧰 Tools Tambahan</h3>
+
+  <button onclick="window.open('tools/github-push-zip.html','_blank')">
+    📦 Push ZIP Custom Repo ke GitHub
+  </button>
+  
+  <button onclick="window.open('tools/wa-admin.html','_blank')">
+    💻 Admin Whatsapp
+  </button>
+</div>
+</div>
+
+</div>
+
+
+
+
+<!-- ============================================================
+     TAB 3 — TOKEN
+============================================================ -->
+<div id="tab-token" class="tab-content">
+
+  <h2>🔐 GitHub Token Manager</h2>
+
+  <div class="card">
+    <label>Token GitHub:</label>
+    <input id="githubToken" type="password" placeholder="Masukkan token">
+
+    <button id="btnPaste">📋 Paste</button>
+    <button id="btnUseStored">🔑 Pakai Token Tersimpan</button>
+    <button id="btnSave">💾 Simpan (Encrypted)</button>
+    <button id="btnSavePlain">💾 Simpan (Plain)</button>
+    <button id="btnClearStored" style="color:red;">🗑 Hapus Token</button>
+
+    <input id="passphrase" type="password" placeholder="Passphrase optional">
+  </div>
+
+</div>
+
+<!-- ============= MODAL KONFIRMASI ============= -->
+<div id="confirmModal">
+  <div id="confirmBox">
+  	
+    <h3>⚠ Hapus Semua Produk?</h3>
+    <p>Semua data produk offline akan dihapus permanen.</p>
+
+    <button style="background:#ff3b30; color:white;" onclick="deleteAllProducts()">Ya, hapus semua</button>
+    <button onclick="closeConfirmDeleteAll()">Batal</button>
+  </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus Semua -->
+<div id="modalConfirm" class="modal" style="display:none;">
+  <div class="modal-content">
+    <p id="modalMessage">Apakah yakin ingin menghapus semua item?</p>
+    <div class="modal-actions">
+      <button id="modalCancel">Batal</button>
+      <button id="modalConfirmBtn">Hapus</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+  <!-- ================== JAVASCRIPT ================== -->
+  <!-- Core / data -->
+<script src="js/helpers.js"></script>
+<script src="js/init-data.js"></script>
+
+<script src="js/ui-modal.js"></script>
+<script src="js/ui-tabs.js"></script>
+<script src="js/ui-table.js"></script>
+<script src="js/bottom-nav.js"></script>
+
+<script src="js/repo-import.js"></script>
+<script src="js/github-sync.js"></script>
+<script src="js/flash.js"></script>
+
+<script src="js/main.js"></script>
+
+
+
+<!-- ================== NAVIGASI================== -->
+<!-- Bottom nav default (produk biasa) -->
+<div id="bottom-nav-normal" class="bottom-nav">
+
+  <button class="nav-btn github" onclick="loadProdukFromRepo()">
+    📥 Import
+  </button>
+
+  <button class="nav-btn" onclick="generateAndScrollJSON()">
+    🧬 Generate
+  </button>
+
+  <button class="nav-btn" id="btnUploadProdukNav">
+  🚀 Upload
+</button>
+
+  <button class="nav-btn" onclick="downloadJSON()">
+    📦 Backup
+  </button>
+
+</div>
+
+
+<!-- Bottom nav khusus Flash Sale (hidden default) -->
+<div id="bottom-nav-flash" class="bottom-nav" style="display:none;">
+  <button class="nav-btn" onclick="scrollToFlashInput()">📝 Input Flash</button>
+  <button class="nav-btn" onclick="generateAndScrollFlashJSON()">💾 Generate JSON Flash</button>
+  <button class="nav-btn" onclick="openConfirmDeleteFlash()">🗑 Hapus Semua Flash</button>
+ <button class="nav-btn" onclick="triggerLoadFlash()">📤 Load Dari GitHub</button>
+</div>
+
+</body>
+</html>
