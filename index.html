@@ -5,24 +5,45 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title></title>
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/sidebar.css">
 <link rel="stylesheet" href="css/bottom-nav.css">
 <link rel="stylesheet" href="css/flash.css">
 <link rel="stylesheet" href="css/tabs.css">
+<link rel="stylesheet" href="css/tabel-produk.css">
+<link rel="stylesheet" href="css/produk-input.css">
 
 
 
 </head>
 <body>
 
-<h1>🛒 Admin Produk</h1>
+<div class="admin-topbar">	
 
-<!-- =============== MENU TAB =============== -->
-<div class="tabs">	
-  <div class="tab active" data-tab="offline">📦 Produk</div>
-  <div class="tab" data-tab="flash">⚡ Promo</div>
-  <div class="tab" data-tab="repo">🖼 Media</div>
-  <div class="tab" data-tab="token">⚙ Pengaturan</div>
+  <div class="top-left">
+    <div class="admin-logo-text">EMU</div>
+  </div>
+
+  <div class="top-center">
+    <div class="search-wrap top-search">
+      <input id="searchInput" placeholder="Cari produk..." autocomplete="off">
+      <span id="searchClear" class="search-clear">❌</span>
+      <div id="searchSuggest" class="search-suggest"></div>
+    </div>
+  </div>
+
+  <div class="top-right">
+    <button class="dot-btn" onclick="toggleTopMenu()">⋮</button>
+
+    <div id="topMenu" class="top-menu hidden">
+      <div onclick="switchTab('offline')">📦 Produk</div>
+      <div onclick="switchTab('flash')">⚡ Promo</div>
+      <div onclick="switchTab('repo')">🖼 Media</div>
+      <div onclick="switchTab('token')">⚙ Pengaturan</div>
+    </div>
+  </div>
+
 </div>
+
 
 <!-- ============================================================
      TAB — PRODUK
@@ -46,7 +67,17 @@
 	
 
 <h3 class="section-title">➕ Input Produk</h3>
-
+<!-- MINI IMPORT JSON -->
+<div class="card json-mini">
+  <details>
+    <summary>📥 Import Banyak Produk (JSON)</summary>
+    <textarea id="jsonInput" placeholder='Tempelkan array JSON di sini...'></textarea>
+    <div class="json-actions">
+      <button onclick="importJSON()">📤 Import</button>
+      <button onclick="clearJSONInput()">🧹 Bersihkan</button>
+    </div>
+  </details>
+</div>
 <!-- FORM TAMBAH -->
 <div class="card">
   <h3>🛍️ Tambah Produk Baru</h3>
@@ -79,17 +110,7 @@
   </div>
 </div>
 
-<!-- MINI IMPORT JSON -->
-<div class="card json-mini">
-  <details>
-    <summary>📥 Import JSON (Opsional)</summary>
-    <textarea id="jsonInput" placeholder='Tempelkan array JSON di sini...'></textarea>
-    <div class="json-actions">
-      <button onclick="importJSON()">📤 Import</button>
-      <button onclick="clearJSONInput()">🧹 Bersihkan</button>
-    </div>
-  </details>
-</div>
+
 
 
 <!-- PRODUK TABLE PAKET -->
@@ -111,13 +132,7 @@
         <option value="priceHigh">Termahal</option>
       </select>
 
-      <div class="search-wrap">
-  <input id="searchInput" placeholder="Cari produk..." autocomplete="off">
-  <span id="searchClear" class="search-clear">❌</span>
-  <div id="searchSuggest" class="search-suggest"></div>
-</div>
-
-
+      
       <button onclick="resetFilter()">🔄</button>
       <button onclick="openConfirmDeleteAll()" class="danger">🗑</button>
     </div>
@@ -147,9 +162,9 @@
 <div class="card">
   <h3>📦 Output JSON</h3>
   <button onclick="generateAndScrollJSON()">🔄 Generate</button>
-  <button onclick="copyJSON()">📋 Copy</button>
-  <button onclick="window.open('tools/ai-product-generator.html','_blank')">🤖 AI Generator</button>
   <pre id="jsonOutput">[ Kosong ]</pre>
+    <button onclick="copyJSON()">📋 Copy</button>
+  <button onclick="window.open('tools/ai-product-generator.html','_blank')">🤖 AI Generator</button>
 </div>
 
 </div>
