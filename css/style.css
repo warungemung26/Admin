@@ -1,4 +1,7 @@
-/* ================== RESET & DASAR ================== */
+/* =========================================================
+   RESET & DASAR
+========================================================= */
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -14,14 +17,24 @@ body {
   overflow-x: hidden;
 }
 
-/* ===== Judul utama ===== */
+
+
+/* =========================================================
+   JUDUL HALAMAN
+========================================================= */
+
 h1 {
   text-align: center;
   margin-bottom: 10px;
   font-size: 1.6em;
 }
 
-/* ===== Card konten ===== */
+
+
+/* =========================================================
+   CARD / PANEL KONTEN
+========================================================= */
+
 .card {
   background: #fff;
   padding: 15px 18px;
@@ -37,45 +50,15 @@ h1 {
 }
 
 
-/* ===== Label & Input ===== */
-label {
-  display: block;
-  margin-top: 8px;
-  font-weight: bold;
-  font-size: 0.95em;
-}
-
-input[type="text"],
-input[type="number"],
-select,
-textarea {
-  width: 100%;
-  padding: 8px 10px;
-  margin-top: 4px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 0.95em;
-}
-
-textarea {
-  height: 100px;
-  resize: vertical;
-  font-family: monospace;
-}
 
 
-.admin-form{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:10px;
-}
 
-.admin-form label,
-.admin-form button{
-  grid-column: span 2;
-}
 
-/* ===== Tombol ===== */
+
+/* =========================================================
+   BUTTON SYSTEM
+========================================================= */
+
 button {
   cursor: pointer;
   border: none;
@@ -84,201 +67,23 @@ button {
   font-size: 0.9em;
   transition: 0.2s;
 }
-button:hover { opacity: 0.85; }
 
-/* Warna tombol khusus */
-.btn-add { background: #28a745; color: #fff; }
-.btn-clear { background: #dc3545; color: #fff; }
-.btn-copy { background: #17a2b8; color: #fff; }
+button:hover { 
+  opacity: 0.85; 
+}
+
+/* Variants */
+.btn-add    { background: #28a745; color: #fff; }
+.btn-clear  { background: #dc3545; color: #fff; }
+.btn-copy   { background: #17a2b8; color: #fff; }
 .btn-upload { background: #6f42c1; color: #fff; }
 
-/* ===== Tabs ===== */
-.tabs {
-  position: sticky;
-  top: 0;
-  z-index: 999;
-  display: flex;
-  border-bottom: 2px solid #ddd;
-  margin-bottom: 15px;
-  background: #fff;
-  padding-top: 8px;
-}
-
-.tab {
-  padding: 10px 16px;
-  cursor: pointer;
-  border: 1px solid #ddd;
-  border-bottom: none;
-  background: #f7f7f7;
-  margin-right: 5px;
-  border-radius: 6px 6px 0 0;
-  font-weight: bold;
-}
-
-.tab.active { 
-  background: #fff; 
-  border-bottom: 2px solid white; 
-}
-
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-
-/* ===== Sticky panel atas (form + filter + tombol) ===== */
-.offline-top {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-bottom: 15px;
-  position: sticky;
-  top: 60px; /* sesuaikan dengan header/tab */
-  background: #f9f9f9;
-  z-index: 10;
-  padding-bottom: 10px;
-}
-
-/* ===== Tabel scrollable ===== */
-.table-wrap {
-  max-height: 350px; /* tinggi maksimal tabel */
-  overflow-y: auto;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-th, td {
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  text-align: left;
-  min-width: 80px;
-}
-
-td[contenteditable] { background: #f9f9f9; }
-tr:nth-child(even) td { background: #f2f2f2; }
-
-/* Sticky header tabel */
-#productTable thead th {
-  position: sticky;
-  top: 0;
-  background: #007bff; /* header biru */
-  color: #fff;
-  z-index: 5;
-}
 
 
-.table-pack{
-  padding:12px;
-}
+/* =========================================================
+   JSON OUTPUT
+========================================================= */
 
-.table-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:8px;
-  gap:10px;
-  flex-wrap:wrap;
-}
-
-.table-tools{
-  display:flex;
-  gap:6px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-
-.table-tools select,
-.table-tools input{
-  padding:6px 8px;
-  font-size:13px;
-}
-
-.table-tools button{
-  padding:6px 8px;
-}
-
-.table-tools .danger{
-  background:#ff3b30;
-  color:white;
-}
-
-.search-wrap{
-  position:relative;
-}
-
-.search-suggest{
-  position:absolute;
-  top:100%;
-  left:0;
-  right:0;
-  background:white;
-  border:1px solid #ddd;
-  border-radius:8px;
-  box-shadow:0 4px 10px rgba(0,0,0,.12);
-  max-height:180px;
-  overflow-y:auto;
-  z-index:2000;
-  display:none;
-}
-
-.search-suggest div{
-  padding:8px 10px;
-  cursor:pointer;
-  font-size:13px;
-}
-
-.search-suggest div:hover{
-  background:#f3f4f6;
-}
-
-.search-suggest{
-  font-size:13px;
-}
-
-.search-wrap{
-  position:relative;
-}
-
-.search-clear{
-  position:absolute;
-  right:8px;
-  top:50%;
-  transform:translateY(-50%);
-  cursor:pointer;
-  color:#999;
-  font-size:14px;
-  display:none;
-}
-
-.search-clear:hover{
-  color:#ff3b30;
-}
-
-.search-wrap input{
-  padding-right:26px;
-}
-
-.table-tools .search-wrap{
-  width:180px;
-  min-width:140px;
-}
-
-.table-tools .search-wrap input{
-  width:100%;
-  height:30px;
-  font-size:13px;
-}
-
-.table-tools button{
-  height:30px;
-  display:flex;
-  align-items:center;
-}
-
-/* ===== Output JSON ===== */
 pre {
   background: #f1f1f1;
   padding: 10px;
@@ -302,54 +107,41 @@ pre {
 }
 
 
-.json-mini details summary{
-  cursor:pointer;
-  font-weight:600;
-  padding:6px;
-}
 
-.json-mini textarea{
-  height:90px;
-  margin-top:8px;
-}
+/* =========================================================
+   MODAL KONFIRMASI
+========================================================= */
 
-.json-actions{
-  display:flex;
-  gap:8px;
-  margin-top:6px;
-}
-
-/* ===== Modal Konfirmasi ===== */
 .modal {
   position: fixed;
-  top: 0;
-  left: 0;
-  width:100%;
-  height:100%;
+  inset: 0;
   background: rgba(0,0,0,0.5);
   display: flex;
-  justify-content:center;
-  align-items:center;
+  justify-content: center;
+  align-items: center;
   z-index: 9999;
 }
 
 .modal-content {
-  background:#fff;
-  padding:20px;
-  border-radius:8px;
-  min-width:250px;
-  text-align:center;
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 250px;
+  text-align: center;
 }
 
 .modal-actions button {
   margin: 0 5px;
   padding: 5px 10px;
-  border:none;
-  cursor:pointer;
-  border-radius:4px;
+  border-radius: 4px;
 }
 
-/* ===== Toast Notification ===== */
+
+
+/* =========================================================
+   TOAST NOTIFICATION
+========================================================= */
+
 .toast {
   position: fixed;
   bottom: 20px;
@@ -371,20 +163,24 @@ pre {
 }
 
 
-/* ===== Preview Gambar Grid Rapih ===== */
+
+/* =========================================================
+   PREVIEW GAMBAR GRID
+========================================================= */
+
 #previewArea {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
   gap: 10px;
   margin-top: 10px;
-  justify-items: start; /* pastikan item selalu ke kiri */
+  justify-items: start;
 }
 
 .preview-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 85px; /* minimal width */
+  width: 85px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 0 3px rgba(0,0,0,0.1);
@@ -419,14 +215,19 @@ pre {
   padding: 2px 5px;
   border-radius: 4px;
   cursor: pointer;
-  border: none;
 }
 
 .preview-item.uploaded { border: 2px solid #27ae60; }
-.preview-item.failed { border: 2px solid #e74c3c; }
+.preview-item.failed   { border: 2px solid #e74c3c; }
 
-/* ===== Responsif ===== */
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
 @media (max-width: 600px) {
+
   #previewArea {
     grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
   }
@@ -439,10 +240,6 @@ pre {
   .preview-item span {
     font-size: 10px;
   }
+
 }
 
-
-/* ===== Scrollable horizontal tabel ===== */
-.table-wrap {
-  overflow-x: auto;
-}
