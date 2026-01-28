@@ -130,3 +130,21 @@ function updateWorkflowUI(){
     }
   });
 }
+
+
+
+function toggleTopMenu(){
+  const m = document.getElementById('topMenu');
+  m.classList.toggle('hidden');
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tab-content').forEach(t=>{
+    t.classList.remove('active');
+  });
+
+  const el = document.getElementById('tab-' + name);
+  if(el) el.classList.add('active');
+
+  document.getElementById('topMenu').classList.add('hidden');
+}
