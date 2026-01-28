@@ -1,0 +1,137 @@
+/* ===========================
+   TABLE PACK (MINIMAL MOBILE)
+=========================== */
+
+.table-pack{
+  padding:12px;
+}
+
+/* HEADER */
+.table-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+  flex-wrap:wrap;
+}
+
+.table-head h3{
+  margin:0;
+  font-size:15px;
+}
+
+/* TOOLS */
+.table-tools{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.table-tools select,
+.table-tools button{
+  height:30px;
+  padding:4px 8px;
+  font-size:13px;
+  border-radius:6px;
+}
+
+.table-tools button{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+
+.table-tools .danger{
+  background:#ff3b30;
+  color:#fff;
+  border:none;
+}
+
+/* WRAP */
+.table-wrap{
+  max-height:350px;
+  overflow:auto;
+  border:1px solid #ddd;
+  border-radius:8px;
+}
+
+/* TABLE */
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th, td{
+  padding:6px 8px;
+  border:1px solid #ddd;
+  text-align:left;
+  font-size:13px;
+  min-width:70px;
+}
+
+td[contenteditable]{
+  background:#fafafa;
+}
+
+tr:nth-child(even) td{
+  background:#f7f7f7;
+}
+
+/* STICKY HEADER */
+#productTable thead th{
+  position:sticky;
+  top:0;
+  background:#007bff;
+  color:#fff;
+  z-index:5;
+}
+
+/* MOBILE TUNING */
+@media(max-width:640px){
+
+  .table-head{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+  }
+
+  .table-tools{
+    width:100%;
+    justify-content:space-between;
+  }
+
+  .table-tools select{
+    flex:1;
+  }
+
+  .table-tools button{
+    min-width:34px;
+  }
+
+  th, td{
+    font-size:12px;
+    padding:6px;
+  }
+
+}
+
+/* ===========================
+   FIX KOLOM GAMBAR SAJA
+=========================== */
+
+#productTable th:nth-child(5),
+#productTable td:nth-child(5){
+  width:70px;
+  max-width:70px;
+  text-align:center;
+}
+
+#productTable td:nth-child(5) img{
+  max-width:40px;
+  height:auto;
+  display:block;
+  margin:0 auto;
+}
