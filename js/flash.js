@@ -1,3 +1,7 @@
+let renameTargetId = null;
+const filePicker = document.getElementById('filePicker');
+
+
 /* ============================================================
    FLASH SALE — DATA & STORAGE
 ============================================================ */
