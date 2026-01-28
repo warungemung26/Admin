@@ -376,6 +376,7 @@ function clearJSONOutput() {
 
 function downloadJSON() {
   if (!jsonOutput) return;
+
   const output = jsonOutput.textContent;
   if (!output || output === '[ Kosong ]') {
     alert('Tidak ada JSON untuk didownload.');
@@ -385,11 +386,14 @@ function downloadJSON() {
   const blob = new Blob([output], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
+
   a.href = url;
   a.download = 'produk.json';
+
   document.body.appendChild(a);
   a.click();
   a.remove();
+
   URL.revokeObjectURL(url);
 }
 
@@ -401,22 +405,54 @@ function generateAndScrollJSON() {
     return;
   }
 
-  // kalau admin belum import tapi data ada (dari localStorage),
-  // kita anggap source sudah siap
   if (!produkFlow.imported && products.length > 0) {
     produkFlow.imported = true;
   }
 
-  const formatted = products.map(p => ({
-    name: p.name,
-    slug: p.slug || makeSlug(p.name),
-    price: Number(p.price || 0),
-    img: p.img || '',
-    category: p.category || '',
-    tags: Array.isArray(p.tags) ? p.tags : []
-  }));
+  // ===== NORMALIZE + CLEAN =====
+  const normalized = products.map(p => {
+    const tags = Array.isArray(p.tags)
+      ? [...new Set(
+          p.tags
+            .map(t => String(t).trim())
+            .filter(Boolean)
+        )]
+      : [];
 
-  const jsonText = JSON.stringify(formatted, null, 2);
+    return {
+      name: String(p.name || '').trim(),
+      slug: p.slug || makeSlug(p.name || ''),
+      price: Number(p.price || 0),
+      img: String(p.img || '').trim(),
+      category: String(p.category || '').trim(),
+      tags
+    };
+  });
+
+  // ===== PRETTY ADMIN FORMAT =====
+  let jsonText = "[\n";
+
+  jsonText += normalized.map(obj => {
+    const lines = [];
+
+    const order = ["name", "slug", "price", "img", "category", "tags"];
+
+    order.forEach(key => {
+      if (!(key in obj)) return;
+
+      const val = obj[key];
+
+      if (key === "tags" && Array.isArray(val)) {
+        lines.push(`    "${key}": [${val.map(v => JSON.stringify(v)).join(", ")}]`);
+      } else {
+        lines.push(`    "${key}": ${JSON.stringify(val)}`);
+      }
+    });
+
+    return "  {\n" + lines.join(",\n") + "\n  }";
+  }).join(",\n");
+
+  jsonText += "\n]";
 
   if (jsonOutput) {
     jsonOutput.textContent = jsonText;
@@ -452,7 +488,6 @@ function generateAndScrollJSON() {
 
   updateWorkflowUI();
 }
-
 
 // ===== EXPORT EXCEL =====
 function exportToExcel() {
