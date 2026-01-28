@@ -1,3 +1,49 @@
+/* ===== Tabs ===== */
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  display: flex;
+  border-bottom: 2px solid #ddd;
+  margin-bottom: 15px;
+  background: #fff;
+  padding-top: 8px;
+}
+
+.tab {
+  padding: 10px 16px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  background: #f7f7f7;
+  margin-right: 5px;
+  border-radius: 6px 6px 0 0;
+  font-weight: bold;
+}
+
+.tab.active { 
+  background: #fff; 
+  border-bottom: 2px solid white; 
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ===== Sticky panel atas (form + filter + tombol) ===== */
+.offline-top {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 15px;
+  position: sticky;
+  top: 60px; /* sesuaikan dengan header/tab */
+  background: #f9f9f9;
+  z-index: 10;
+  padding-bottom: 10px;
+}
+
+
+
 /* ====== STYLE TAB (STICKY) ====== */
 .tabs {
   position: sticky;
