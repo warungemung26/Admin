@@ -118,20 +118,3 @@ tr:nth-child(even) td{
 
 }
 
-/* ===========================
-   FIX KOLOM GAMBAR SAJA
-=========================== */
-
-#productTable th:nth-child(5),
-#productTable td:nth-child(5){
-  width:70px;
-  max-width:70px;
-  text-align:center;
-}
-
-#productTable td:nth-child(5) img{
-  max-width:40px;
-  height:auto;
-  display:block;
-  margin:0 auto;
-}
