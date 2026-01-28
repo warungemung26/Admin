@@ -50,3 +50,11 @@ function calcJSONInfo(jsonText){
     return {count:0,size:0};
   }
 }
+
+
+function sanitizeFileName(name) {
+  return name
+    .toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-_]/g, '');
+}
