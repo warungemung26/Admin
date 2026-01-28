@@ -324,6 +324,10 @@ function importJSON() {
       const img = (p.img && typeof p.img === 'string') 
                   ? (p.img.includes('/') ? p.img : 'images/' + sanitizeFileName(p.img)) 
                   : '';
+      const tags = Array.isArray(p.tags)
+  ? p.tags.map(t => String(t).trim()).filter(Boolean)
+  : [];
+          
 
       if (!name || !price || !category || !img) return; // skip yg tidak lengkap
 
@@ -337,16 +341,25 @@ function importJSON() {
 
       if (idx !== -1) {
         // replace produk lama
-        products[idx] = { id: products[idx].id, name, price, category, img };
+        products[idx] = { 
+  id: products[idx].id, 
+  name, 
+  slug: products[idx].slug || makeSlug(name),
+  price, 
+  category, 
+  img,
+  tags
+};
       } else {
         // tambah produk baru
         products.push({
   id: generateId(),
   name,
-  slug: makeSlug(name), // fallback utk JSON lama
+  slug: makeSlug(name),
   price,
   category,
-  img
+  img,
+  tags
 });
       }
     });
