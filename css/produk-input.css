@@ -1,0 +1,169 @@
+/* =========================================================
+   FORM & INPUT
+========================================================= */
+
+label {
+  display: block;
+  margin-top: 8px;
+  font-weight: bold;
+  font-size: 0.95em;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 4px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95em;
+}
+
+textarea {
+  height: 100px;
+  resize: vertical;
+  font-family: monospace;
+}
+
+.admin-form{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.admin-form label,
+.admin-form button{
+  grid-column: span 2;
+}
+
+.json-mini details summary{
+  cursor: pointer;
+  font-weight: 600;
+  padding: 6px;
+}
+
+.json-mini textarea{
+  height: 90px;
+  margin-top: 8px;
+}
+
+.json-actions{
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+
+
+/* =========================================================
+   PRODUK INPUT + JSON (SEPAKET)
+========================================================= */
+
+#tab-offline .card{
+  padding:12px;
+}
+
+#tab-offline .card h3{
+  font-size:14px;
+  margin-bottom:6px;
+}
+
+
+
+/* =========================================================
+   FORM PRODUK
+========================================================= */
+
+#tab-offline .admin-form{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+#tab-offline .admin-form input,
+#tab-offline .admin-form select{
+  height:34px;
+  font-size:13px;
+}
+
+#tab-offline .admin-form button{
+  grid-column:span 2;
+  height:34px;
+  font-size:13px;
+}
+
+#tab-offline .admin-form label{
+  grid-column:span 2;
+  font-size:12px;
+}
+
+
+
+/* =========================================================
+   IMAGE PICKER ROW
+========================================================= */
+
+#tab-offline .admin-form > div{
+  grid-column:span 2;
+  display:flex;
+  gap:6px;
+}
+
+#tab-offline .admin-form > div input{
+  flex:1;
+}
+
+
+
+/* =========================================================
+   JSON MINI (IMPORT)
+========================================================= */
+
+#tab-offline .json-mini{
+  margin-top:8px;
+  background:#fafafa;
+  border:1px dashed #ddd;
+}
+
+#tab-offline .json-mini details summary{
+  font-size:13px;
+  padding:6px;
+}
+
+#tab-offline .json-mini textarea{
+  height:90px;
+  font-size:12px;
+}
+
+#tab-offline .json-actions{
+  display:flex;
+  gap:6px;
+}
+
+#tab-offline .json-actions button{
+  flex:1;
+  height:32px;
+  font-size:12px;
+}
+
+
+
+/* =========================================================
+   MOBILE STACK
+========================================================= */
+
+@media(max-width:600px){
+
+  #tab-offline .admin-form{
+    grid-template-columns:1fr;
+  }
+
+  #tab-offline .admin-form button,
+  #tab-offline .admin-form label,
+  #tab-offline .admin-form > div{
+    grid-column:span 1;
+  }
+
+}
