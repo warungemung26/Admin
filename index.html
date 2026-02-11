@@ -175,6 +175,21 @@
      TAB FLASH SALE
 ============================================================ -->
 <div id="tab-flash" class="tab-content">
+	<div class="workflow-wrap">
+
+  <div class="workflow-bar flash-flow">
+    <span data-step="import">📥 Import</span>
+    <span data-step="generate">🧬 Generate</span>
+    <span data-step="publish">🚀 Publish</span>
+    <span data-step="backup">📥 Backup</span>
+  </div>
+
+  <div id="flashFlowStatus" class="source-status">
+    📌 Silakan import data flash terlebih dahulu.
+  </div>
+
+</div>
+
   <h2>⚡ Kelola Flash Sale</h2>
 
   <!-- IMPORT BOX -->
@@ -320,13 +335,24 @@
   <div class="card">
   <h3>🧰 Tools Tambahan</h3>
 
-  <button onclick="window.open('tools/github-push-zip.html','_blank')">
-    📦 Push ZIP Custom Repo ke GitHub
-  </button>
-  
-  <button onclick="window.open('tools/wa-admin.html','_blank')">
-    💻 Admin Whatsapp
-  </button>
+<button onclick="window.open('tools/github-push-zip.html','_blank')">
+  📦 Push ZIP Custom Repo ke GitHub
+</button>
+
+<button onclick="window.open('tools/wa-admin.html','_blank')">
+  💻 Admin Whatsapp
+</button>
+
+<button onclick="openTagEditor()">
+  🏷️ Edit Tag Produk
+</button>
+
+<script>
+function openTagEditor(){
+  window.open('tools/tagEditorUpdate.html', '_blank');
+}
+</script>
+
 </div>
 </div>
 
@@ -384,20 +410,40 @@
 <!-- TOAST -->
 <div id="toast" class="toast"></div>
 
-  <!-- ================== JAVASCRIPT ================== -->
-  <!-- Core / data -->
+<!-- ================== JAVASCRIPT ================== -->
+
+<!-- CORE & GLOBAL -->
 <script src="js/helpers.js"></script>
 <script src="js/init-data.js"></script>
 
+<!-- STATE / FLOW -->
+<script src="js/produk-workflow.js"></script>
+
+<!-- UI LAYER -->
 <script src="js/ui-modal.js"></script>
 <script src="js/ui-tabs.js"></script>
-<script src="js/ui-table.js"></script>
+<script src="js/import-lokal-json.js"></script>
+<script src="js/generate-json.js"></script>
+<script src="js/rename-image-picker.js"></script>
 <script src="js/bottom-nav.js"></script>
 
-<script src="js/repo-import.js"></script>
-<script src="js/github-sync.js"></script>
-<script src="js/flash.js"></script>
+<!-- TOKEN & AUTH -->
+<script src="js/token-manager.js"></script>
 
+<!-- REPO / GITHUB -->
+<script src="js/repo-import.js"></script>
+<script src="js/repo-folder-manager.js"></script>
+<script src="js/upload-images.js"></script>
+<script src="js/push-zip.js"></script>
+
+<!-- PRODUK & FLASH -->
+<script src="js/flash.js"></script>
+<script src="js/flash-json.js"></script>
+
+<!-- UI TABLE LAST -->
+<script src="js/ui-table.js"></script>
+
+<!-- MAIN BOOTSTRAP -->
 <script src="js/main.js"></script>
 
 
@@ -425,13 +471,33 @@
 </div>
 
 
-<!-- Bottom nav khusus Flash Sale (hidden default) -->
 <div id="bottom-nav-flash" class="bottom-nav" style="display:none;">
-  <button class="nav-btn" onclick="scrollToFlashInput()">📝 Input Flash</button>
-  <button class="nav-btn" onclick="generateAndScrollFlashJSON()">💾 Generate JSON Flash</button>
-  <button class="nav-btn" onclick="openConfirmDeleteFlash()">🗑 Hapus Semua Flash</button>
- <button class="nav-btn" onclick="triggerLoadFlash()">📤 Load Dari GitHub</button>
+
+  <button class="nav-btn" id="navFlashImport"
+          onclick="document.getElementById('btnLoadFlash')?.click()">
+    📥 Import
+  </button>
+
+  <button class="nav-btn" id="navFlashGenerate"
+          onclick="generateAndScrollFlashJSON()">
+    🧬 Generate
+  </button>
+
+  <button class="nav-btn" id="navFlashUpload"
+          onclick="document.getElementById('btnUploadFlash')?.click()">
+    🚀 Upload
+  </button>
+
+  <button class="nav-btn" id="navFlashBackup"
+          onclick="downloadFlashJSON()">
+    📦 Backup
+  </button>
+
 </div>
+
+
+</div>
+
 
 </body>
 </html>
