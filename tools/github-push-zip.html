@@ -365,7 +365,7 @@ async function deletePath(path){
   log("🗑️ " + path)
 }
 
-/* ========= PUSH ZIP + PROGRESS (FIX LOADING LAMA) ========= */
+/* ========= PUSH ZIP + PROGRESS (BINARY SAFE) ========= */
 const yieldUI = () => new Promise(r => setTimeout(r, 0))
 
 async function pushZip(){
@@ -384,20 +384,24 @@ async function pushZip(){
   for(const f of files){
     await yieldUI()
 
-    setProgress(
-      Math.round((done / total) * 100),
-      `📄 ${f.name}`
-    )
+    setProgress(Math.round((done/total)*100), `📄 ${f.name}`)
 
-    const content = await f.async("string")
-    await pushFile(f.name, content)
+    // Tentukan apakah file binary
+    const isBinary = /(\.png|\.jpg|\.jpeg|\.gif|\.webp|\.ico|\.svg|\.woff|\.woff2|\.ttf|\.eot)$/i.test(f.name)
+
+    // Ambil content
+    let content
+    if(isBinary){
+      content = await f.async("base64")
+    }else{
+      content = await f.async("string")
+      content = btoa(unescape(encodeURIComponent(content)))
+    }
+
+    await pushFile(f.name, content, isBinary)
 
     done++
-    setProgress(
-      Math.round((done / total) * 100),
-      `⬆️ Upload ${done}/${total}`
-    )
-
+    setProgress(Math.round((done/total)*100), `⬆️ Upload ${done}/${total}`)
     log("⬆️ " + f.name)
   }
 
@@ -405,28 +409,28 @@ async function pushZip(){
   log("✅ Push ZIP selesai")
 }
 
-async function pushFile(path, content){
-  const api =
-    `https://api.github.com/repos/${username.value}/${repo.value}/contents/${path}`
+// Push satu file ke GitHub
+async function pushFile(path, content, isBinary=false){
+  const api = `https://api.github.com/repos/${username.value}/${repo.value}/contents/${path}`
 
   let sha = null
-  const check = await fetch(api + `?ref=${branch.value}`, {
-    headers: ghHeaders()
-  })
-
+  const check = await fetch(api + `?ref=${branch.value}`, { headers: ghHeaders() })
   if(check.ok){
     sha = (await check.json()).sha
+  }
+
+  // Jika binary, langsung kirim base64, jika teks, content sudah di-btoa
+  const payload = {
+    message: "push zip",
+    content: content,
+    branch: branch.value,
+    ...(sha && { sha })
   }
 
   const res = await fetch(api, {
     method: "PUT",
     headers: ghHeaders(),
-    body: JSON.stringify({
-      message: "push zip",
-      content: btoa(unescape(encodeURIComponent(content))),
-      branch: branch.value,
-      ...(sha && { sha })
-    })
+    body: JSON.stringify(payload)
   })
 
   if(!res.ok) throw await res.text()
